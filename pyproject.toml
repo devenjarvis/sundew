@@ -16,7 +16,17 @@ pydantic = "^1.10.2"
 mypy = "^0.991"
 black = "^22.12.0"
 ruff = "^0.0.196"
+poethepoet = "^0.17.1"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poe.tasks]
+test_examples = "python -m shore ./examples"
+test_shore = "python -m shore ./shore"
+lint = "ruff ."
+type = "mypy ."
+format = "black ."
+
+
