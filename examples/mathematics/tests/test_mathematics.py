@@ -4,33 +4,38 @@ from shore.test import test
 
 test(mathematics.product)(
     input={"a": 2, "b": 3},
-    output=6,
+    returns=6,
 )
 test(mathematics.product)(
     input={"a": 5, "b": 5},
-    output=25,
+    returns=25,
 )
+
+test(mathematics.divide)(input={"a": 10.0, "b": 2.0}, returns=5.0)
+
+test(mathematics.divide)(input={"a": 10.0, "b": 0.0}, returns=ZeroDivisionError)
+
 
 test(mathematics.negative)(
     input={"a": 2},
-    output=-2,
+    returns=-2,
 )
 test(mathematics.negative)(
     input={"a": -5},
-    output=5,
+    returns=5,
 )
 
 test(mathematics.square)(
     input={"a": 5},
-    output=25,
+    returns=25,
 )
 
 test(mathematics.square_root)(
     input={"a": 25},
-    output=5,
+    returns=5,
 )
 
 test(mathematics.quadratic)(
     input={"a": 1, "b": -8, "c": 5},
-    output=(7.3166247903554, 0.6833752096446002),
+    returns=(7.3166247903554, 0.6833752096446002),
 )

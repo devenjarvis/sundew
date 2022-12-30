@@ -4,15 +4,15 @@ from shore.test import test
 
 test(strings.concatenate)(
     input={"a": "123", "b": "456"},
-    output="123456",
+    returns="123456",
 )
 test(strings.reverse)(
     input={"a": "123"},
-    output="321",
+    returns="321",
 )
 test(strings.make_silly)(
     input={"a": "123", "b": "456"},
-    output="321654",
+    returns="321654",
 )
 test(strings.print_string)(
     input={"a": "123"},

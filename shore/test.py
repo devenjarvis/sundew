@@ -16,7 +16,7 @@ class TestError(Exception):
 def test(fn):
     def decorator(
         input: dict | None,
-        output: Any | None = None,
+        returns: Any | None = None,
         patched: dict = dict(),
         side_effects: list[Callable] = [],
     ):
@@ -53,7 +53,7 @@ def test(fn):
             FunctionTest(
                 function=shore_test_wrapper,
                 input=input,
-                output=output,
+                returns=returns,
                 patched=patched,
                 side_effects=side_effects,
             )
@@ -71,16 +71,23 @@ def run():
                 for target, new in test.patched.items():
                     stack.enter_context(patch(target, new))
             # Run the test function once for evaluation
-            actual_output = test.function(**test.input)
-
-        # If we have defined side effects
-        if test.side_effects:
-            for side_effect in test.side_effects:
-                if test.patched:
-                    assert side_effect(patched=test.patched, **test.input)
-                else:
-                    assert side_effect(**test.input)
-        # If we have defined output
-        if test.output:
-            assert actual_output == test.output
+            try:
+                actual_return = test.function(**test.input)
+            except Exception as e:
+                # If we get an exception, check to see if it was expected
+                if test.returns:
+                    assert isinstance(e, test.returns)
+            else:
+                # If we didn't get an exception then check the output normally
+                if test.returns:
+                    assert actual_return == test.returns
+            finally:
+                # Regardless of if we got a planned exception or not,
+                # check if we have defined side effects
+                if test.side_effects:
+                    for side_effect in test.side_effects:
+                        if test.patched:
+                            assert side_effect(patched=test.patched, **test.input)
+                        else:
+                            assert side_effect(**test.input)
         print(". PASS")

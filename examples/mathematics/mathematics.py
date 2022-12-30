@@ -5,6 +5,10 @@ def product(a: int, b: int) -> int:
     return a * b
 
 
+def divide(a: float, b: float) -> float:
+    return a / b
+
+
 def negative(a: int) -> int:
     return a * -1
 
