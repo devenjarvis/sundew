@@ -1,4 +1,3 @@
-from shore.test import test
 from math import sqrt
 
 
