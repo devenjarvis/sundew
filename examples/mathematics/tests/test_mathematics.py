@@ -11,6 +11,12 @@ test(mathematics.product)(
     returns=25,
 )
 
+# Failing test
+test(mathematics.product)(
+    input={"a": 2, "b": 3},
+    returns=8,
+)
+
 test(mathematics.divide)(input={"a": 10.0, "b": 2.0}, returns=5.0)
 
 test(mathematics.divide)(input={"a": 10.0, "b": 0.0}, returns=ZeroDivisionError)

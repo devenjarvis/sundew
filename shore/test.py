@@ -6,6 +6,8 @@ from shore.config import config
 from shore.types import FunctionTest
 from contextlib import ExitStack
 from unittest.mock import patch
+from rich import print
+import os
 
 
 class TestError(Exception):
@@ -51,6 +53,7 @@ def test(fn):
 
         config.tests.append(
             FunctionTest(
+                location=f"{os.path.relpath(inspect.stack()[1][1])}:{inspect.stack()[1][2]}",
                 function=shore_test_wrapper,
                 input=input,
                 returns=returns,
@@ -66,28 +69,38 @@ def test(fn):
 def run():
     for test in config.tests:
         with ExitStack() as stack:
-            # programmatically apply any patches defined
-            if test.patches:
-                for target, new in test.patches.items():
-                    stack.enter_context(patch(target, new))
-            # Run the test function once for evaluation
             try:
-                actual_return = test.function(**test.input)
+                # programmatically apply any patches defined
+                if test.patches:
+                    for target, new in test.patches.items():
+                        stack.enter_context(patch(target, new))
+                # Run the test function once for evaluation
+                try:
+                    actual_return = test.function(**test.input)
+                except Exception as e:
+                    # If we get an exception, check to see if it was expected
+                    if test.returns:
+                        assert isinstance(e, test.returns)
+                else:
+                    # If we didn't get an exception then check the output normally
+                    if test.returns:
+                        assert actual_return == test.returns, (
+                            f"Input {test.input} returned {actual_return} which does "
+                            + f"not match the expected return of {test.returns}"
+                        )
+                finally:
+                    # Regardless of if we got a planned exception or not,
+                    # check if we have defined side effects
+                    if test.side_effects:
+                        for side_effect in test.side_effects:
+                            if test.patches:
+                                assert side_effect(patches=test.patches, **test.input)
+                            else:
+                                assert side_effect(**test.input)
+            except AssertionError as e:
+                print(f"{test.location} - [bold red]FAILED[/bold red] - {str(e)}")
+                break
             except Exception as e:
-                # If we get an exception, check to see if it was expected
-                if test.returns:
-                    assert isinstance(e, test.returns)
+                print(e)
             else:
-                # If we didn't get an exception then check the output normally
-                if test.returns:
-                    assert actual_return == test.returns
-            finally:
-                # Regardless of if we got a planned exception or not,
-                # check if we have defined side effects
-                if test.side_effects:
-                    for side_effect in test.side_effects:
-                        if test.patches:
-                            assert side_effect(patches=test.patches, **test.input)
-                        else:
-                            assert side_effect(**test.input)
-        print(". PASS")
+                print("[green]. PASS[/green]")

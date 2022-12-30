@@ -6,7 +6,7 @@ A new kind of testing framework for Python.
 
 ## To-do
 Major things that still need to be done before making public (in rough order):
-[ ] - Handle test failures
+[x] - Handle test failures
 [ ] - Handle test errors
 [ ] - Fixtures
 [ ] - Write tests for shore 🤭

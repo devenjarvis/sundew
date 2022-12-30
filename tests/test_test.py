@@ -1,4 +1,4 @@
-from shore import test
+# from shore import test
 
 # 🤔
 ...
