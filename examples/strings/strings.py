@@ -10,5 +10,5 @@ def make_silly(a: str, b: str) -> str:
     return reverse(concatenate(b, a))
 
 
-def print_string(a: str) -> str:
+def print_string(a: str):
     print(a)

@@ -24,21 +24,26 @@ def test(fn):
         # Don't check this wrapper function
         if func_name != "shore_test_wrapper":
             # Get package_name, module_name, and module
-            module_name = inspect.getmodule(fn).__name__
-            module = importlib.import_module(module_name)
-            config.modules.add(module.__name__)
+            if module := inspect.getmodule(fn):
+                module_name = module.__name__
+                imported_module = importlib.import_module(module_name)
+                config.modules.add(imported_module.__name__)
 
-            # Loop through sub functions called
-            for sub_func_name in fn.__code__.co_names:
-                # We only care about functions in the modules we are testing
-                if hasattr(module, sub_func_name):
-                    # Verify that the funcion is native to the modules we are testing
-                    parent_module = getattr(module, sub_func_name).__module__
-                    # Only connect functions within the module
-                    if parent_module in config.modules:
-                        config.function_graph.add_connections(
-                            [(func_name, sub_func_name)]
-                        )
+                # Loop through sub functions called
+                for sub_func_name in fn.__code__.co_names:
+                    # We only care about functions in the modules being tested
+                    if hasattr(imported_module, sub_func_name):
+                        # Verify that the funcion is native to the modules being tested
+                        parent_module = getattr(
+                            imported_module, sub_func_name
+                        ).__module__
+                        # Only connect functions within the module
+                        if parent_module in config.modules:
+                            config.function_graph.add_connections(
+                                [(func_name, sub_func_name)]
+                            )
+            else:
+                ...
 
         @wraps(fn)
         def shore_test_wrapper(*args, **kwargs):
