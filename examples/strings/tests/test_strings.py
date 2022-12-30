@@ -16,17 +16,17 @@ test(strings.make_silly)(
 )
 test(strings.print_string)(
     input={"a": "123"},
-    patched={"sys.stdout": io.StringIO()},
+    patches={"sys.stdout": io.StringIO()},
     side_effects=[
-        lambda patched, **_: patched["sys.stdout"].getvalue(),
+        lambda patches, **_: patches["sys.stdout"].getvalue(),
         lambda a, **_: a == "123",
     ],
 )
 test(strings.print_string)(
     input={"a": "456"},
-    patched={"sys.stdout": io.StringIO()},
+    patches={"sys.stdout": io.StringIO()},
     side_effects=[
-        lambda patched, **_: patched["sys.stdout"].getvalue() == "456\n",
+        lambda patches, **_: patches["sys.stdout"].getvalue() == "456\n",
         lambda a, **_: a == "456",
     ],
 )

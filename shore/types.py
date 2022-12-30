@@ -6,5 +6,5 @@ class FunctionTest(BaseModel):
     function: Callable
     input: dict[str, Any] = dict()
     returns: Any | None = None
-    patched: dict[str, Any] = dict()
+    patches: dict[str, Any] = dict()
     side_effects: list[Callable] = []

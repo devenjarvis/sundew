@@ -17,7 +17,7 @@ def test(fn):
     def decorator(
         input: dict | None,
         returns: Any | None = None,
-        patched: dict = dict(),
+        patches: dict = dict(),
         side_effects: list[Callable] = [],
     ):
         func_name = fn.__code__.co_name
@@ -54,7 +54,7 @@ def test(fn):
                 function=shore_test_wrapper,
                 input=input,
                 returns=returns,
-                patched=patched,
+                patches=patches,
                 side_effects=side_effects,
             )
         )
@@ -67,8 +67,8 @@ def run():
     for test in config.tests:
         with ExitStack() as stack:
             # programmatically apply any patches defined
-            if test.patched:
-                for target, new in test.patched.items():
+            if test.patches:
+                for target, new in test.patches.items():
                     stack.enter_context(patch(target, new))
             # Run the test function once for evaluation
             try:
@@ -86,8 +86,8 @@ def run():
                 # check if we have defined side effects
                 if test.side_effects:
                     for side_effect in test.side_effects:
-                        if test.patched:
-                            assert side_effect(patched=test.patched, **test.input)
+                        if test.patches:
+                            assert side_effect(patches=test.patches, **test.input)
                         else:
                             assert side_effect(**test.input)
         print(". PASS")
