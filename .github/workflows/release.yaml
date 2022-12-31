@@ -24,4 +24,4 @@ jobs:
       - name: Publish
         run: |
           poetry version $(git describe --tags --abbrev=0)
-          poetry publish --build --username ${{ secrets.PYPI_USERNAME }} --password ${{ secrets.PYPI_PASSWORD }}
+          poetry publish --build --username ${{ secrets.PYPI_USERNAME }} --password ${{ secrets.PYPI_TOKEN }}
