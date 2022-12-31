@@ -102,9 +102,9 @@ def run():
                                 assert side_effect(**test.input)
             except AssertionError as e:
                 print(f"\n[bold red1]FAILURE[/] {test.location} - {str(e)}")
-                sys.exit()
+                sys.exit(1)
             except Exception as e:
                 print(f"\n[bold orange1]ERROR[/] {test.location} - {str(e)}")
-                sys.exit()
+                sys.exit(1)
             else:
                 print("[green].[/]", end="")
