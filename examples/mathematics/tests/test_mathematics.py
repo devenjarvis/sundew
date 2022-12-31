@@ -1,5 +1,5 @@
 from examples.mathematics import mathematics
-from shore.test import test
+from sundew.test import test
 
 
 test(mathematics.product)(

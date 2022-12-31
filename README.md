@@ -1,4 +1,4 @@
-# shore 🏖️
+# sundew ☀️
 A new kind of testing framework for Python.
 
 > **Warning**
@@ -9,7 +9,7 @@ Major things that still need to be done before making public (in rough order):
 [x] - Handle test failures
 [ ] - Handle test errors
 [ ] - Fixtures
-[ ] - Write tests for shore 🤭
+[ ] - Write tests for sundew 🤭
 [ ] - Figure out test naming
 [ ] - Basic test selection support
 [ ] - Asyncio support/examples

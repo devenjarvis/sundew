@@ -1,4 +1,4 @@
-# from shore import graph
-# from shore.test import test
+# from sundew import graph
+# from sundew.test import test
 
 ...

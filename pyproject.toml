@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "shore"
+name = "sundew"
 version = "0.1.0"
 description = ""
 authors = ["devenjarvis <devenjarvis@gmail.com>"]
@@ -23,8 +23,8 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poe.tasks]
-test_examples = "python -m shore ./examples"
-test_shore = "python -m shore ./shore"
+test_examples = "python -m sundew ./examples"
+test_sundew = "python -m sundew ./sundew"
 lint = "ruff ."
 type = "mypy ."
 format = "black ."

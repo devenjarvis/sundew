@@ -1,5 +1,5 @@
-from shore.config import config
-from shore import test
+from sundew.config import config
+from sundew import test
 
 import typer
 import importlib

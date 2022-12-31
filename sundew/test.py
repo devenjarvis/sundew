@@ -2,8 +2,8 @@ from functools import wraps
 from typing import Any, Callable
 import inspect
 import importlib
-from shore.config import config
-from shore.types import FunctionTest
+from sundew.config import config
+from sundew.types import FunctionTest
 from contextlib import ExitStack
 from unittest.mock import patch
 from rich import print
@@ -24,7 +24,7 @@ def test(fn):
     ):
         func_name = fn.__code__.co_name
         # Don't check this wrapper function
-        if func_name != "shore_test_wrapper":
+        if func_name != "sundew_test_wrapper":
             # Get package_name, module_name, and module
             if module := inspect.getmodule(fn):
                 module_name = module.__name__
@@ -48,20 +48,20 @@ def test(fn):
                 ...
 
         @wraps(fn)
-        def shore_test_wrapper(*args, **kwargs):
+        def sundew_test_wrapper(*args, **kwargs):
             return fn(*args, **kwargs)
 
         config.tests.append(
             FunctionTest(
                 location=f"{os.path.relpath(inspect.stack()[1][1])}:{inspect.stack()[1][2]}",
-                function=shore_test_wrapper,
+                function=sundew_test_wrapper,
                 input=input,
                 returns=returns,
                 patches=patches,
                 side_effects=side_effects,
             )
         )
-        return shore_test_wrapper
+        return sundew_test_wrapper
 
     return decorator
 

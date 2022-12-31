@@ -1,6 +1,6 @@
 from examples.strings import strings
 import io
-from shore.test import test
+from sundew.test import test
 
 test(strings.concatenate)(
     input={"a": "123", "b": "456"},

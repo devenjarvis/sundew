@@ -1,6 +1,6 @@
 from pydantic import BaseSettings
-from shore.graph import Graph
-from shore.types import FunctionTest
+from sundew.graph import Graph
+from sundew.types import FunctionTest
 
 
 class Configuration(BaseSettings):
