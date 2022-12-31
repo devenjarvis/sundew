@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sundew"
-version = "0.1.0"
+version = "0.0.0"
 description = ""
 authors = ["devenjarvis <devenjarvis@gmail.com>"]
 readme = "README.md"
