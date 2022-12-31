@@ -28,5 +28,7 @@ test_sundew = "python -m sundew ./sundew"
 lint = "ruff ."
 type = "mypy ."
 format = "black ."
+format_check = "black . --check"
+
 
 
