@@ -33,5 +33,5 @@ def quadratic(a: int, b: int, c: int) -> tuple[float, float]:
     return (positive_solution, negative_solution)
 
 
-def error(a: int):
-    raise Exception("Something failed!")
+# def error(a: int):
+#     raise Exception("Something failed!")
