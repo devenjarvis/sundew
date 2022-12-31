@@ -9,7 +9,7 @@ A new kind of testing framework for Python.
 Major things that still need to be done before making public (in rough order):  
 
 - [x] Handle test failures  
-- [ ] Handle test errors
+- [x] Handle test errors
 - [ ] Fixtures
 - [ ] Write tests for sundew 🤭
 - [ ] Figure out test naming
