@@ -82,6 +82,8 @@ def run():
                     # If we get an exception, check to see if it was expected
                     if test.returns:
                         assert isinstance(e, test.returns)
+                    else:
+                        raise e
                 else:
                     # If we didn't get an exception then check the output normally
                     if test.returns:
@@ -99,9 +101,10 @@ def run():
                             else:
                                 assert side_effect(**test.input)
             except AssertionError as e:
-                print(f"[bold red]FAILURE[/bold red] {test.location} - {str(e)}")
-                sys.exit("Test suite did not pass successfully")
+                print(f"\n[bold red1]FAILURE[/] {test.location} - {str(e)}")
+                sys.exit()
             except Exception as e:
-                print(e)
+                print(f"\n[bold orange1]ERROR[/] {test.location} - {str(e)}")
+                sys.exit()
             else:
-                print("[green]. PASS[/green]")
+                print("[green].[/]", end="")

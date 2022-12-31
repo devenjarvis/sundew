@@ -31,3 +31,7 @@ def quadratic(a: int, b: int, c: int) -> tuple[float, float]:
     ) / product(2, a)
 
     return (positive_solution, negative_solution)
+
+
+def error(a: int):
+    raise Exception("Something failed!")

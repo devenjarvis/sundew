@@ -17,6 +17,9 @@ test(mathematics.product)(
 #     returns=8,
 # )
 
+# Test error
+test(mathematics.error)(input={"a": 2})
+
 test(mathematics.divide)(input={"a": 10.0, "b": 2.0}, returns=5.0)
 
 test(mathematics.divide)(input={"a": 10.0, "b": 0.0}, returns=ZeroDivisionError)
