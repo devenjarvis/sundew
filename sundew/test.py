@@ -1,4 +1,5 @@
 from functools import wraps
+import sys
 from typing import Any, Callable
 import inspect
 import importlib
@@ -98,8 +99,8 @@ def run():
                             else:
                                 assert side_effect(**test.input)
             except AssertionError as e:
-                print(f"{test.location} - [bold red]FAILED[/bold red] - {str(e)}")
-                break
+                print(f"[bold red]FAILURE[/bold red] {test.location} - {str(e)}")
+                sys.exit("Test suite did not pass successfully")
             except Exception as e:
                 print(e)
             else:

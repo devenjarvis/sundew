@@ -1,7 +1,5 @@
 name: CI
-on:
-  pull_request:
-    types: [opened, reopened]
+on: [push]
 
 jobs:
   test:
@@ -24,9 +22,9 @@ jobs:
       - name: Install dependencies
         run: poetry install
       - name: Run example tests
-        run: poe test_examples
+        run: poetry run poe test_examples
       - name: Run sundew tests
-        run: poe test_sundew
+        run: poetry run poe test_sundew
   code-quality:
     strategy:
       fail-fast: false
@@ -47,8 +45,8 @@ jobs:
       - name: Install dependencies
         run: poetry install
       - name: Run type check
-        run: poe type
+        run: poetry run poe type
       - name: Run lint check
-        run: poe lint
+        run: poetry run poe lint
       - name: Run format check
-        run: poe format_check
+        run: poetry run poe format_check

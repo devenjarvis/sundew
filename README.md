@@ -20,5 +20,6 @@ Major things that still need to be done before making public (in rough order):
 [ ] - Parallel test runner support
 [ ] - Add code of conduct
 [ ] - Add contribution guidelines
-[ ] - Setup Github Actions to release new versions to PyPi
-[ ] - Release first version to Pypi
+[x] - Setup Github Actions to run CI on PR
+[x] - Setup Github Actions to release new versions to PyPi
+[ ] - Release version 0.1.0 to PyPi
