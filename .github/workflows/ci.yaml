@@ -1,7 +1,5 @@
 name: CI
-on:
-  pull_request:
-    types: [opened, reopened]
+on: [push]
 
 jobs:
   test:
