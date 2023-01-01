@@ -102,8 +102,9 @@ def run():
                         # If we didn't get an exception then check the output normally
                         if test.returns:
                             assert actual_return == test.returns, (
-                                f"Input {test.input} returned {actual_return} which does "
-                                + f"not match the expected return of {test.returns}"
+                                f"Input {test.input} returned {actual_return} "
+                                + "which does not match the expected return of "
+                                + f"{test.returns}"
                             )
                     finally:
                         # Regardless of if we got a planned exception or not,
