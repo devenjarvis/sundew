@@ -8,8 +8,9 @@ A new kind of testing framework for Python.
 
 Major things that still need to be done before making public (in rough order):  
 
-- [x] Handle test failures  
+- [x] Handle test output failures  
 - [x] Handle test errors
+- [ ] Handle test side-effect failures  
 - [ ] Fixtures
 - [ ] Write tests for sundew 🤭
 - [ ] Figure out test naming
