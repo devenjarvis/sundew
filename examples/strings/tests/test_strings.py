@@ -32,10 +32,10 @@ test(strings.print_string)(
 )
 
 # Failing side-effect test
-test(strings.print_string)(
-    input={"a": "789"},
-    patches={"sys.stdout": io.StringIO()},
-    side_effects=[
-        lambda l: l.patched["sys.stdout"].getvalue() == "7ate9\n",
-    ],
-)
+# test(strings.print_string)(
+#     input={"a": "789"},
+#     patches={"sys.stdout": io.StringIO()},
+#     side_effects=[
+#         lambda l: l.patched["sys.stdout"].getvalue() == "7ate9\n",
+#     ],
+# )

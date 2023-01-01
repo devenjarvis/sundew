@@ -19,6 +19,22 @@ import os
 from pydantic import create_model
 
 
+def build_side_effect_vars(test_function: Callable):
+    # Parse function signature annotations
+    funtion_arguments = dict()
+    for name, parameter in inspect.signature(test_function).parameters.items():
+        funtion_arguments[name] = (
+            parameter if not inspect.Signature.empty else Any,
+            ...,
+        )
+
+    return create_model(
+        "SideEffectVars",
+        patched=(dict[str, Any], dict()),
+        **funtion_arguments,
+    )
+
+
 def test(fn):
     def decorator(
         input: dict | None,
@@ -111,14 +127,7 @@ def run():
                         # check if we have defined side effects
                         if test.side_effects:
                             for side_effect in test.side_effects:
-                                SideEffectVars = create_model(
-                                    "SideEffectVars",
-                                    patched=(dict[str, Any], dict()),
-                                    **{
-                                        kwarg: (arg_type, ...)
-                                        for kwarg, arg_type in test.function.__annotations__.items()
-                                    },
-                                )
+                                SideEffectVars = build_side_effect_vars(test.function)
                                 assert side_effect(
                                     SideEffectVars(patched=test.patches, **test.input)
                                 ), f"({lambda_internals(side_effect)}) is not true."
