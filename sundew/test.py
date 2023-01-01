@@ -8,7 +8,15 @@ from sundew.types import FunctionTest
 from contextlib import ExitStack
 from unittest.mock import patch
 from rich import print
+from rich.progress import (
+    Progress,
+    TextColumn,
+    BarColumn,
+    MofNCompleteColumn,
+    TimeElapsedColumn,
+)
 import os
+from time import sleep
 
 
 class TestError(Exception):
@@ -68,43 +76,59 @@ def test(fn):
 
 
 def run():
-    for test in config.tests:
-        with ExitStack() as stack:
-            try:
-                # programmatically apply any patches defined
-                if test.patches:
-                    for target, new in test.patches.items():
-                        stack.enter_context(patch(target, new))
-                # Run the test function once for evaluation
+    with Progress(
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        MofNCompleteColumn(),
+        TimeElapsedColumn(),
+    ) as progress:
+        for test in progress.track(config.tests, description="Running tests..."):
+            with ExitStack() as stack:
                 try:
-                    actual_return = test.function(**test.input)
-                except Exception as e:
-                    # If we get an exception, check to see if it was expected
-                    if test.returns:
-                        assert isinstance(e, test.returns)
+                    # programmatically apply any patches defined
+                    if test.patches:
+                        for target, new in test.patches.items():
+                            stack.enter_context(patch(target, new))
+                    # Run the test function once for evaluation
+                    try:
+                        actual_return = test.function(**test.input)
+                    except Exception as e:
+                        # If we get an exception, check to see if it was expected
+                        if test.returns:
+                            assert isinstance(e, test.returns)
+                        else:
+                            raise e
                     else:
-                        raise e
-                else:
-                    # If we didn't get an exception then check the output normally
-                    if test.returns:
-                        assert actual_return == test.returns, (
-                            f"Input {test.input} returned {actual_return} which does "
-                            + f"not match the expected return of {test.returns}"
-                        )
-                finally:
-                    # Regardless of if we got a planned exception or not,
-                    # check if we have defined side effects
-                    if test.side_effects:
-                        for side_effect in test.side_effects:
-                            if test.patches:
-                                assert side_effect(patches=test.patches, **test.input)
-                            else:
-                                assert side_effect(**test.input)
-            except AssertionError as e:
-                print(f"\n[bold red1]FAILURE[/] {test.location} - {str(e)}")
-                sys.exit(1)
-            except Exception as e:
-                print(f"\n[bold orange1]ERROR[/] {test.location} - {str(e)}")
-                sys.exit(1)
-            else:
-                print("[green].[/]", end="")
+                        # If we didn't get an exception then check the output normally
+                        if test.returns:
+                            assert actual_return == test.returns, (
+                                f"Input {test.input} returned {actual_return} which does "
+                                + f"not match the expected return of {test.returns}"
+                            )
+                    finally:
+                        # Regardless of if we got a planned exception or not,
+                        # check if we have defined side effects
+                        if test.side_effects:
+                            for side_effect in test.side_effects:
+                                if test.patches:
+                                    assert side_effect(
+                                        patches=test.patches, **test.input
+                                    )
+                                else:
+                                    assert side_effect(**test.input)
+                except AssertionError as e:
+                    # Give progress bar enough time to update
+                    sleep(0.15)
+                    # Stop the progress bar
+                    progress.stop()
+                    # Log details of the failure
+                    print(f"\n[bold red1]FAILURE[/] {test.location} - {str(e)}")
+                    sys.exit(1)
+                except Exception as e:
+                    # Give progress bar enough time to update
+                    sleep(0.15)
+                    # Stop the progress bar
+                    progress.stop()
+                    # Log details of the error
+                    print(f"\n[bold orange1]ERROR[/] {test.location} - {str(e)}")
+                    sys.exit(1)
