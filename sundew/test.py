@@ -75,6 +75,10 @@ def test(fn):
     return decorator
 
 
+def lambda_internals(func):
+    return inspect.getsource(func).split(":")[1].strip()[:-1]
+
+
 def run():
     with Progress(
         TextColumn("[progress.description]{task.description}"),
@@ -114,7 +118,7 @@ def run():
                                 if test.patches:
                                     assert side_effect(
                                         patches=test.patches, **test.input
-                                    )
+                                    ), f"({lambda_internals}) is not true."
                                 else:
                                     assert side_effect(**test.input)
                 except AssertionError as e:
