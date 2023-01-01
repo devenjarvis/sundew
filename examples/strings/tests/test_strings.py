@@ -18,24 +18,24 @@ test(strings.print_string)(
     input={"a": "123"},
     patches={"sys.stdout": io.StringIO()},
     side_effects=[
-        lambda patches, **_: patches["sys.stdout"].getvalue() == "123\n",
-        lambda a, **_: a == "123",
+        lambda l: l.patched["sys.stdout"].getvalue() == "123\n",
+        lambda l: l.a == "123",
     ],
 )
 test(strings.print_string)(
     input={"a": "456"},
     patches={"sys.stdout": io.StringIO()},
     side_effects=[
-        lambda patches, **_: patches["sys.stdout"].getvalue() == "456\n",
-        lambda a, **_: a == "456",
+        lambda l: l.patched["sys.stdout"].getvalue() == "456\n",
+        lambda l: l.a == "456",
     ],
 )
 
 # Failing side-effect test
-# test(strings.print_string)(
-#     input={"a": "789"},
-#     patches={"sys.stdout": io.StringIO()},
-#     side_effects=[
-#         lambda patches, **_: patches["sys.stdout"].getvalue() == "7ate9\n",
-#     ],
-# )
+test(strings.print_string)(
+    input={"a": "789"},
+    patches={"sys.stdout": io.StringIO()},
+    side_effects=[
+        lambda l: l.patched["sys.stdout"].getvalue() == "7ate9\n",
+    ],
+)

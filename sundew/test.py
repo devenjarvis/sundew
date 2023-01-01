@@ -16,12 +16,7 @@ from rich.progress import (
     TimeElapsedColumn,
 )
 import os
-from time import sleep
-
-
-class TestError(Exception):
-    def __init__(self, message):
-        self.message = message
+from pydantic import create_model
 
 
 def test(fn):
@@ -86,7 +81,8 @@ def run():
         MofNCompleteColumn(),
         TimeElapsedColumn(),
     ) as progress:
-        for test in progress.track(config.tests, description="Running tests..."):
+        tests_ran = progress.add_task("Running tests...", total=len(config.tests))
+        for test in config.tests:
             with ExitStack() as stack:
                 try:
                     # programmatically apply any patches defined
@@ -115,25 +111,28 @@ def run():
                         # check if we have defined side effects
                         if test.side_effects:
                             for side_effect in test.side_effects:
-                                if test.patches:
-                                    assert side_effect(
-                                        patches=test.patches, **test.input
-                                    ), f"({lambda_internals}) is not true."
-                                else:
-                                    assert side_effect(**test.input)
+                                SideEffectVars = create_model(
+                                    "SideEffectVars",
+                                    patched=(dict[str, Any], dict()),
+                                    **{
+                                        kwarg: (arg_type, ...)
+                                        for kwarg, arg_type in test.function.__annotations__.items()
+                                    },
+                                )
+                                assert side_effect(
+                                    SideEffectVars(patched=test.patches, **test.input)
+                                ), f"({lambda_internals(side_effect)}) is not true."
                 except AssertionError as e:
-                    # Give progress bar enough time to update
-                    sleep(0.15)
                     # Stop the progress bar
                     progress.stop()
                     # Log details of the failure
                     print(f"\n[bold red1]FAILURE[/] {test.location} - {str(e)}")
                     sys.exit(1)
                 except Exception as e:
-                    # Give progress bar enough time to update
-                    sleep(0.15)
                     # Stop the progress bar
                     progress.stop()
                     # Log details of the error
                     print(f"\n[bold orange1]ERROR[/] {test.location} - {str(e)}")
                     sys.exit(1)
+                else:
+                    progress.advance(tests_ran)
