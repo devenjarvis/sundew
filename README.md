@@ -10,7 +10,7 @@ Major things that still need to be done before making public (in rough order):
 
 - [x] Handle test output failures  
 - [x] Handle test errors
-- [ ] Handle test side-effect failures  
+- [ ] Handle test side-effect failures (in progress - working basically)
 - [ ] Fixtures
 - [ ] Write tests for sundew 🤭
 - [ ] Figure out test naming
@@ -26,3 +26,8 @@ Major things that still need to be done before making public (in rough order):
 - [x] Setup Github Actions to run CI on PR
 - [x] Setup Github Actions to release new versions to PyPi
 - [ ] Release version 0.1.0 to PyPi
+
+Future items to look into:
+
+- [ ] Hypothesis integration?
+- [ ] Test-case generation for runtime exceptions?

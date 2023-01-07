@@ -6,6 +6,7 @@ import inspect
 import importlib
 from sundew.config import config
 from sundew.types import FunctionTest
+from sundew.side_effects import ConvertSideEffect
 from contextlib import ExitStack
 from unittest.mock import patch
 from rich import print
@@ -17,10 +18,10 @@ from rich.progress import (
     TimeElapsedColumn,
 )
 import os
-from pydantic import create_model
+from pydantic import BaseModel, create_model
 
 
-def build_side_effect_vars(test_function: Callable):
+def build_side_effect_vars(test_function: Callable) -> BaseModel:
     # Parse function signature annotations
     funtion_arguments = dict()
     for name, parameter in inspect.signature(test_function).parameters.items():
@@ -87,41 +88,13 @@ def test(fn):
     return decorator
 
 
-class GenerateFailureMessage(ast.NodeTransformer):
-    def visit_Lambda(self, node):
-        if isinstance(node.body, ast.Compare):
-            return ast.Assert(
-                test=node.body,
-                msg=ast.JoinedStr(
-                    values=[
-                        ast.Constant(value="left="),
-                        ast.FormattedValue(value=node.body.left, conversion=-1),
-                        ast.Constant(value=" right="),
-                        ast.FormattedValue(
-                            value=node.body.comparators[0], conversion=-1
-                        ),
-                    ]
-                ),
-            )
-        else:
-            return ast.Assert(
-                test=node.body,
-                msg=ast.JoinedStr(
-                    values=[
-                        ast.Constant(value=ast.unparse(node.body)),
-                        ast.Constant(value=" is False."),
-                    ]
-                ),
-            )
-
-
-def lambda_internals(func):
-    return inspect.getsource(func).split(":")[1].strip()[:-1]
+def get_lambda_source(func):
+    return inspect.getsource(func).strip()[:-1]
 
 
 def run():
     with Progress(
-        TextColumn("[progress.description]{task.description}"),
+        TextColumn("{task.description}"),
         BarColumn(),
         MofNCompleteColumn(),
         TimeElapsedColumn(),
@@ -157,14 +130,12 @@ def run():
                         if test.side_effects:
                             for side_effect in test.side_effects:
                                 SideEffectVars = build_side_effect_vars(test.function)
-                                error_node = GenerateFailureMessage().visit(
-                                    ast.parse(
-                                        inspect.getsource(side_effect).strip()[:-1]
-                                    )
+                                side_effect_ast = ConvertSideEffect().visit(
+                                    ast.parse(get_lambda_source(side_effect))
                                 )
-                                new_side_effect = ast.unparse(error_node)
+                                side_effect_code = ast.unparse(side_effect_ast)
                                 l = SideEffectVars(patched=test.patches, **test.input)
-                                exec(new_side_effect)
+                                exec(side_effect_code)
                 except AssertionError as e:
                     # Stop the progress bar
                     progress.stop()
