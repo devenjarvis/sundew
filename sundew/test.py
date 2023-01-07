@@ -1,3 +1,4 @@
+import ast
 from functools import wraps
 import sys
 from typing import Any, Callable
@@ -86,6 +87,34 @@ def test(fn):
     return decorator
 
 
+class GenerateFailureMessage(ast.NodeTransformer):
+    def visit_Lambda(self, node):
+        if isinstance(node.body, ast.Compare):
+            return ast.Assert(
+                test=node.body,
+                msg=ast.JoinedStr(
+                    values=[
+                        ast.Constant(value="left="),
+                        ast.FormattedValue(value=node.body.left, conversion=-1),
+                        ast.Constant(value=" right="),
+                        ast.FormattedValue(
+                            value=node.body.comparators[0], conversion=-1
+                        ),
+                    ]
+                ),
+            )
+        else:
+            return ast.Assert(
+                test=node.body,
+                msg=ast.JoinedStr(
+                    values=[
+                        ast.Constant(value=ast.unparse(node.body)),
+                        ast.Constant(value=" is False."),
+                    ]
+                ),
+            )
+
+
 def lambda_internals(func):
     return inspect.getsource(func).split(":")[1].strip()[:-1]
 
@@ -128,9 +157,14 @@ def run():
                         if test.side_effects:
                             for side_effect in test.side_effects:
                                 SideEffectVars = build_side_effect_vars(test.function)
-                                assert side_effect(
-                                    SideEffectVars(patched=test.patches, **test.input)
-                                ), f"({lambda_internals(side_effect)}) is not true."
+                                error_node = GenerateFailureMessage().visit(
+                                    ast.parse(
+                                        inspect.getsource(side_effect).strip()[:-1]
+                                    )
+                                )
+                                new_side_effect = ast.unparse(error_node)
+                                l = SideEffectVars(patched=test.patches, **test.input)
+                                exec(new_side_effect)
                 except AssertionError as e:
                     # Stop the progress bar
                     progress.stop()
