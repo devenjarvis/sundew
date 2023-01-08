@@ -12,7 +12,7 @@ Major things that still need to be done before making public (in rough order):
 - [x] Handle test errors
 - [ ] Handle test side-effect failures (in progress - working basically)
 - [x] Basic enforcing of test isolation (Isolate inputs)
-- [ ] Fixtures
+- [ ] Fixtures (in progress - implemented for inputs)
 - [ ] Write tests for sundew 🤭
 - [ ] Figure out test naming
 - [ ] Basic test selection support

@@ -1,5 +1,6 @@
 from sundew.graph import Graph
 from sundew.test import test
+import tests.fixtures as fixtures
 
 test(Graph.add_connections)(
     input={"self": Graph(), "connections": [("A", "B")]},
@@ -23,4 +24,10 @@ test(Graph.dependencies)(
 test(Graph.usage)(
     input={"self": Graph(), "node": "B"},
     returns={},
+)
+
+
+test(Graph.usage)(
+    input={"self": fixtures.setup_simple_graph(), "node": "B"},
+    returns={"A"},
 )
