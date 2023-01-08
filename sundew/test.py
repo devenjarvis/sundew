@@ -1,4 +1,5 @@
 import ast
+import copy
 from functools import wraps
 import sys
 from typing import Any, Callable
@@ -71,6 +72,9 @@ def test(fn):
 
         @wraps(fn)
         def sundew_test_wrapper(*args, **kwargs):
+            # global_shadow = {
+            #     k: v for k, v in globals().items() if not k.startswith("__")
+            # }
             return fn(*args, **kwargs)
 
         config.tests.append(
@@ -109,7 +113,8 @@ def run():
                             stack.enter_context(patch(target, new))
                     # Run the test function once for evaluation
                     try:
-                        actual_return = test.function(**test.input)
+                        isolated_input = copy.deepcopy(test.input)
+                        actual_return = test.function(**isolated_input)
                     except Exception as e:
                         # If we get an exception, check to see if it was expected
                         if test.returns:
@@ -134,7 +139,9 @@ def run():
                                     ast.parse(get_lambda_source(side_effect))
                                 )
                                 side_effect_code = ast.unparse(side_effect_ast)
-                                l = SideEffectVars(patched=test.patches, **test.input)
+                                l = SideEffectVars(
+                                    patched=test.patches, **isolated_input
+                                )
                                 exec(side_effect_code)
                 except AssertionError as e:
                     # Stop the progress bar
@@ -146,6 +153,7 @@ def run():
                     # Stop the progress bar
                     progress.stop()
                     # Log details of the error
+                    # progress.console.print_exception(show_locals=True)
                     print(f"\n[bold orange1]ERROR[/] {test.location} - {str(e)}")
                     sys.exit(1)
                 else:
