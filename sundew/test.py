@@ -60,8 +60,8 @@ def test(fn):
                     if hasattr(imported_module, sub_func_name):
                         # Verify that the funcion is native to the modules being tested
                         parent_module = getattr(
-                            imported_module, sub_func_name
-                        ).__module__
+                            getattr(imported_module, sub_func_name), "__module__", None
+                        )
                         # Only connect functions within the module
                         if parent_module in config.modules:
                             config.function_graph.add_connections(
@@ -124,11 +124,21 @@ def run():
                     else:
                         # If we didn't get an exception then check the output normally
                         if test.returns:
-                            assert actual_return == test.returns, (
-                                f"Input {test.input} returned {actual_return} "
-                                + "which does not match the expected return of "
-                                + f"{test.returns}"
-                            )
+                            if isinstance(actual_return, ast.Module):
+                                assert (
+                                    ast.unparse(actual_return).strip()
+                                    == ast.unparse(test.returns).strip()
+                                ), (
+                                    f"Input {test.input} returned AST for {ast.unparse(actual_return).strip()} "
+                                    + "which does not match the expected AST for "
+                                    + f"{ast.unparse(test.returns).strip()}"
+                                )
+                            else:
+                                assert actual_return == test.returns, (
+                                    f"Input {test.input} returned {actual_return} "
+                                    + "which does not match the expected return of "
+                                    + f"{test.returns}"
+                                )
                     finally:
                         # Regardless of if we got a planned exception or not,
                         # check if we have defined side effects

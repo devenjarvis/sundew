@@ -25,8 +25,6 @@ test(Graph.usage)(
     input={"self": Graph(), "node": "B"},
     returns={},
 )
-
-
 test(Graph.usage)(
     input={"self": fixtures.setup_simple_graph(), "node": "B"},
     returns={"A"},
