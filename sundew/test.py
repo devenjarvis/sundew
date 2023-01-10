@@ -24,10 +24,10 @@ from pydantic import BaseModel, create_model
 
 def build_side_effect_vars(test_function: Callable) -> BaseModel:
     # Parse function signature annotations
-    funtion_arguments = dict()
+    funtion_arguments: dict[str, Any] = dict()
     for name, parameter in inspect.signature(test_function).parameters.items():
         funtion_arguments[name] = (
-            parameter if not inspect.Signature.empty else Any,
+            parameter or Any,
             ...,
         )
 
