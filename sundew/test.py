@@ -39,8 +39,9 @@ def build_side_effect_vars(test_function: Callable) -> BaseModel:
 
 
 def test(fn):
+    @wraps(fn)
     def decorator(
-        input: dict | None,
+        input: dict = dict(),
         returns: Any | None = None,
         patches: dict = dict(),
         side_effects: list[Callable] = [],
@@ -92,8 +93,24 @@ def test(fn):
     return decorator
 
 
-def get_lambda_source(func):
-    return inspect.getsource(func).strip()[:-1]
+def build_side_effects(funcs: list[Callable]) -> set[str]:
+    for func in funcs:
+        code_string = inspect.getsource(func).strip()
+
+        class LambdaGetter(ast.NodeTransformer):
+            def __init__(self):
+                super().__init__()
+                self.lambda_sources: set[str] = set()
+
+            def visit_Lambda(self, node):
+                self.lambda_sources.add(ast.unparse(node).strip())
+
+            def get(self, code_string):
+                tree = ast.parse(code_string)
+                self.visit(tree)
+                return self.lambda_sources
+
+    return LambdaGetter().get(code_string)
 
 
 def run():
@@ -143,10 +160,11 @@ def run():
                         # Regardless of if we got a planned exception or not,
                         # check if we have defined side effects
                         if test.side_effects:
-                            for side_effect in test.side_effects:
+                            side_effect_sources = build_side_effects(test.side_effects)
+                            for side_effect_source in side_effect_sources:
                                 SideEffectVars = build_side_effect_vars(test.function)
                                 side_effect_ast = ConvertSideEffect().visit(
-                                    ast.parse(get_lambda_source(side_effect))
+                                    ast.parse(side_effect_source)
                                 )
                                 side_effect_code = ast.unparse(side_effect_ast)
                                 l = SideEffectVars(
@@ -163,7 +181,7 @@ def run():
                     # Stop the progress bar
                     progress.stop()
                     # Log details of the error
-                    # progress.console.print_exception(show_locals=True)
+                    progress.console.print_exception(show_locals=True)
                     print(f"\n[bold orange1]ERROR[/] {test.location} - {str(e)}")
                     sys.exit(1)
                 else:
