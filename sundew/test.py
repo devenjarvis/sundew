@@ -19,25 +19,10 @@ from rich.progress import (
     TimeElapsedColumn,
 )
 import os
-from pydantic import BaseModel, create_model
 
 
-def build_side_effect_vars(test_function: Callable) -> BaseModel:
-    # Parse function signature annotations
-    funtion_arguments: dict[str, Any] = dict()
-    for name, parameter in inspect.signature(test_function).parameters.items():
-        funtion_arguments[name] = (
-            parameter.annotation
-            if parameter.annotation is not inspect.Signature.empty
-            else Any,
-            ...,
-        )
-
-    return create_model(
-        "SideEffectVars",
-        patched=(dict[str, Any], dict()),
-        **funtion_arguments,
-    )
+arg: dict[str, Any] = dict()
+patched: dict[str, Any] = dict()
 
 
 def test(fn):
@@ -96,23 +81,25 @@ def test(fn):
 
 
 def build_side_effects(funcs: list[Callable]) -> set[str]:
+    class LambdaGetter(ast.NodeTransformer):
+        def __init__(self):
+            super().__init__()
+            self.lambda_sources: set[str] = set()
+
+        def visit_Lambda(self, node):
+            self.lambda_sources.add(ast.unparse(node).strip())
+
+        def get(self, code_string):
+            tree = ast.parse(code_string)
+            self.visit(tree)
+            return self.lambda_sources
+
+    side_effects = LambdaGetter()
     for func in funcs:
         code_string = inspect.getsource(func).strip()
+        side_effects.get(code_string)
 
-        class LambdaGetter(ast.NodeTransformer):
-            def __init__(self):
-                super().__init__()
-                self.lambda_sources: set[str] = set()
-
-            def visit_Lambda(self, node):
-                self.lambda_sources.add(ast.unparse(node).strip())
-
-            def get(self, code_string):
-                tree = ast.parse(code_string)
-                self.visit(tree)
-                return self.lambda_sources
-
-    return LambdaGetter().get(code_string)
+    return side_effects.lambda_sources
 
 
 def run():
@@ -148,7 +135,8 @@ def run():
                                     ast.unparse(actual_return).strip()
                                     == ast.unparse(test.returns).strip()
                                 ), (
-                                    f"Input {test.input} returned AST for {ast.unparse(actual_return).strip()} "
+                                    f"Input {test.input} returned AST for "
+                                    + f"{ast.unparse(actual_return).strip()} "
                                     + "which does not match the expected AST for "
                                     + f"{ast.unparse(test.returns).strip()}"
                                 )
@@ -164,14 +152,13 @@ def run():
                         if test.side_effects:
                             side_effect_sources = build_side_effects(test.side_effects)
                             for side_effect_source in side_effect_sources:
-                                SideEffectVars = build_side_effect_vars(test.function)
                                 side_effect_ast = ConvertSideEffect().visit(
                                     ast.parse(side_effect_source)
                                 )
                                 side_effect_code = ast.unparse(side_effect_ast)
-                                l = SideEffectVars(
-                                    patched=test.patches, **isolated_input
-                                )
+                                # Replace variables used by side_effects
+                                arg = isolated_input  # noqa: F841
+                                patched = test.patches  # noqa: F841
                                 exec(side_effect_code)
                 except AssertionError as e:
                     # Stop the progress bar

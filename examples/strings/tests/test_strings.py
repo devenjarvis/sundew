@@ -1,6 +1,6 @@
 from examples.strings import strings
 import io
-from sundew.test import test
+from sundew.test import test, arg, patched
 
 test(strings.concatenate)(
     input={"a": "123", "b": "456"},
@@ -18,16 +18,16 @@ test(strings.print_string)(
     input={"a": "123"},
     patches={"sys.stdout": io.StringIO()},
     side_effects=[
-        lambda l: l.patched["sys.stdout"].getvalue() == "123\n",
-        lambda l: l.a == "123",
+        lambda: patched["sys.stdout"].getvalue() == "123\n",
+        lambda: arg["a"] == "123",
     ],
 )
 test(strings.print_string)(
     input={"a": "456"},
     patches={"sys.stdout": io.StringIO()},
     side_effects=[
-        lambda l: l.patched["sys.stdout"].getvalue() == "456\n",
-        lambda l: l.a == "456",
+        lambda: patched["sys.stdout"].getvalue() == "456\n",
+        lambda: arg["a"] == "456",
     ],
 )
 
@@ -36,6 +36,6 @@ test(strings.print_string)(
 #     input={"a": "789"},
 #     patches={"sys.stdout": io.StringIO()},
 #     side_effects=[
-#         lambda l: l.patched["sys.stdout"].getvalue() == "7ate9\n",
+#         lambda: patched["sys.stdout"].getvalue() == "7ate9\n",
 #     ],
 # )

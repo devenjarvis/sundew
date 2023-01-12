@@ -1,8 +1,9 @@
 from sundew import test as sundew_test
-from sundew.test import test
-from sundew.config import config
-from pydantic import create_model
-import tests.fixtures as fixtures
+from sundew.test import test, arg
+
+# from sundew.config import config
+# from pydantic import create_model
+# import tests.fixtures as fixtures
 
 # TODO: Figure out how to test a dynamic model
 # test(sundew_test.build_side_effect_vars)(
@@ -21,16 +22,21 @@ import tests.fixtures as fixtures
 # )
 
 test(sundew_test.build_side_effects)(
-    input={"funcs": [lambda l: l.a == l.b]},
-    returns={"lambda l: l.a == l.b"},
+    input={"funcs": [lambda: arg["a"] == arg["b"]]},
+    returns={"lambda: arg['a'] == arg['b']"},
 )
 
 test(sundew_test.build_side_effects)(
-    input={"funcs": [lambda l: l.a == l.b, lambda a: a.c - a.d != a.e]},
-    returns={"lambda l: l.a == l.b", "lambda a: a.c - a.d != a.e"},
+    input={
+        "funcs": [
+            lambda: arg["a"] == arg["b"],
+            lambda: (arg["c"] - arg["d"]) != arg["e"],
+        ]
+    },
+    returns={"lambda: arg['a'] == arg['b']", "lambda: arg['c'] - arg['d'] != arg['e']"},
 )
 
 test(sundew_test.build_side_effects)(
-    input={"funcs": [lambda l: l.a == l.b, lambda l: l.a == l.b]},
-    returns={"lambda l: l.a == l.b"},
+    input={"funcs": [lambda: arg["a"] == arg["b"], lambda: arg["a"] == arg["b"]]},
+    returns={"lambda: arg['a'] == arg['b']"},
 )
