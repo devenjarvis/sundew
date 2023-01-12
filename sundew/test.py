@@ -61,8 +61,11 @@ def test(fn):
         @wraps(fn)
         def sundew_test_wrapper(*args, **kwargs):
             # global_shadow = {
-            #     k: v for k, v in globals().items() if not k.startswith("__")
+            #     k: v
+            #     for k, v in globals().items()
+            #     if not k.startswith("__") and not isinstance(v, module)
             # }
+            # print(global_shadow)
             return fn(*args, **kwargs)
 
         config.tests.append(

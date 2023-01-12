@@ -2,14 +2,7 @@ from sundew import test as sundew_test
 from sundew.test import test, arg
 
 # from sundew.config import config
-# from pydantic import create_model
 # import tests.fixtures as fixtures
-
-# TODO: Figure out how to test a dynamic model
-# test(sundew_test.build_side_effect_vars)(
-#     input={"test_function": fixtures.example_function()},
-#     returns=fixtures.ExampleSideEffectVars,
-# )
 
 # TODO: Figure out how to compare function outputs
 # TODO: Figure out how to isolate globals for side_effects
@@ -40,3 +33,6 @@ test(sundew_test.build_side_effects)(
     input={"funcs": [lambda: arg["a"] == arg["b"], lambda: arg["a"] == arg["b"]]},
     returns={"lambda: arg['a'] == arg['b']"},
 )
+
+# can't test sundew.test.run due to the fact that we are using it.
+# Not sure if this is surmountable, or if I just need to break it up for better coverage
