@@ -27,7 +27,9 @@ def build_side_effect_vars(test_function: Callable) -> BaseModel:
     funtion_arguments: dict[str, Any] = dict()
     for name, parameter in inspect.signature(test_function).parameters.items():
         funtion_arguments[name] = (
-            parameter or Any,
+            parameter.annotation
+            if parameter.annotation is not inspect.Signature.empty
+            else Any,
             ...,
         )
 
