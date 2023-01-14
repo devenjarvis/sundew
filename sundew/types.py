@@ -8,4 +8,4 @@ class FunctionTest(BaseModel):
     input: dict[str, Any] = dict()
     returns: Any | None = None
     patches: dict[str, Any] = dict()
-    side_effects: list[Callable] = []
+    side_effects: list[Callable[[], None]] = []
