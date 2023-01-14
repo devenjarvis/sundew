@@ -98,8 +98,17 @@ def apply_patches(test: FunctionTest, stack: ExitStack):
             stack.enter_context(patch(target, new))
 
 
-def run_function(test: FunctionTest, isolated_input: dict[str, Any]) -> dict[str, Any]:
+def copy_function_inputs(test: FunctionTest) -> dict[str, Any]:
+    signature = inspect.signature(test.function)
+    defaults = {
+        k: v.default
+        for k, v in signature.parameters.items()
+        if v.default is not inspect.Parameter.empty
+    }
+    return copy.deepcopy(defaults | test.input)
 
+
+def run_function(test: FunctionTest, isolated_input: dict[str, Any]) -> dict[str, Any]:
     if inspect.iscoroutinefunction(test.function):
         return asyncio.run(test.function(**isolated_input))
     else:
@@ -154,7 +163,7 @@ def run_test(
         apply_patches(test, stack)
         try:
             # Isolate input arguments
-            isolated_input = copy.deepcopy(test.input)
+            isolated_input = copy_function_inputs(test)
             # Run the test function once for evaluation
             actual_return = run_function(test, isolated_input)
         except Exception as e:
