@@ -2,6 +2,7 @@ import ast
 import copy
 from functools import wraps
 import sys
+import asyncio
 from typing import Any, Callable
 import inspect
 import importlib
@@ -58,20 +59,25 @@ def test(fn):
             else:
                 ...
 
-        @wraps(fn)
+        # global_shadow = {
+        #     k: v
+        #     for k, v in globals().items()
+        #     if not k.startswith("__") and not isinstance(v, ModuleType)
+        # }
+        # print(global_shadow)
+
         def sundew_test_wrapper(*args, **kwargs):
-            # global_shadow = {
-            #     k: v
-            #     for k, v in globals().items()
-            #     if not k.startswith("__") and not isinstance(v, module)
-            # }
-            # print(global_shadow)
             return fn(*args, **kwargs)
+
+        async def async_sundew_test_wrapper(*args, **kwargs):
+            return await fn(*args, **kwargs)
 
         config.tests.append(
             FunctionTest(
                 location=f"{os.path.relpath(inspect.stack()[1][1])}:{inspect.stack()[1][2]}",
-                function=sundew_test_wrapper,
+                function=async_sundew_test_wrapper
+                if inspect.iscoroutinefunction(fn)
+                else sundew_test_wrapper,
                 input=input,
                 returns=returns,
                 patches=patches,
@@ -123,7 +129,10 @@ def run():
                     # Run the test function once for evaluation
                     try:
                         isolated_input = copy.deepcopy(test.input)
-                        actual_return = test.function(**isolated_input)
+                        if inspect.iscoroutinefunction(test.function):
+                            actual_return = asyncio.run(test.function(**isolated_input))
+                        else:
+                            actual_return = test.function(**isolated_input)
                     except Exception as e:
                         # If we get an exception, check to see if it was expected
                         if test.returns:
