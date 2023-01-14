@@ -16,7 +16,7 @@ Major things that still need to be done before making public (in rough order):
 - [ ] Write tests for sundew 🤭 (in progress)
 - [ ] Figure out test naming
 - [ ] Basic test selection support
-- [ ] Asyncio support/examples
+- [x] Asyncio support/examples (basic implementation)
 - [ ] Documentation
 - [ ] Implement smart test runner
 - [ ] Implement automatic sub-function test cases
