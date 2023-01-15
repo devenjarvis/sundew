@@ -75,7 +75,7 @@ def test(fn) -> Callable:
         returns: Any | None = None,
         patches: dict = dict(),
         side_effects: list[Callable] = [],
-    ) -> None:
+    ) -> Callable:
         update_function_graph(fn)
 
         config.tests.append(
@@ -88,6 +88,8 @@ def test(fn) -> Callable:
                 side_effects=side_effects,
             )
         )
+
+        return add_test
 
     return add_test
 

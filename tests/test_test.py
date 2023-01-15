@@ -26,9 +26,7 @@ import tests.fixtures as fixtures
 test(sundew_test.copy_function_inputs)(
     input={"test": fixtures.passing_function_test},
     returns={"a": 1, "b": "2"},
-)
-
-test(sundew_test.copy_function_inputs)(
+)(
     input={"test": fixtures.passing_function_test_with_defaults},
     returns={"a": 1, "b": "hello"},
 )

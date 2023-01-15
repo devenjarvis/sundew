@@ -29,9 +29,7 @@ test(side_effects.SideEffectGetter.get)(
 test(side_effects.get_source)(
     input={"funcs": [lambda: arg["a"] == arg["b"]]},
     returns={"lambda: arg['a'] == arg['b']"},
-)
-
-test(side_effects.get_source)(
+)(
     input={
         "funcs": [
             lambda: arg["a"] == arg["b"],
@@ -39,9 +37,7 @@ test(side_effects.get_source)(
         ]
     },
     returns={"lambda: arg['a'] == arg['b']", "lambda: arg['c'] - arg['d'] != arg['e']"},
-)
-
-test(side_effects.get_source)(
+)(
     input={"funcs": [lambda: arg["a"] == arg["b"], lambda: arg["a"] == arg["b"]]},
     returns={"lambda: arg['a'] == arg['b']"},
 )

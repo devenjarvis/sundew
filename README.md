@@ -12,8 +12,10 @@ Major things that still need to be done before making public (in rough order):
 - [x] Handle test errors
 - [ ] Handle test side-effect failures (in progress - working basically)
 - [x] Basic enforcing of test isolation (Isolate inputs)
+- [x] Simplify writing multiple tests for a function
+- [ ] Look into a better side_effect signature
 - [ ] Fixtures (in progress - implemented for inputs)
-- [ ] Write tests for sundew 🤭 (in progress)
+- [ ] Write tests for sundew 🤭 (Almost there...)
 - [ ] Figure out test naming
 - [ ] Basic test selection support
 - [x] Asyncio support/examples (basic implementation)
