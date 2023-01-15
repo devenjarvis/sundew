@@ -89,6 +89,8 @@ def test(fn) -> Callable:
             )
         )
 
+        return add_test
+
     return add_test
 
 

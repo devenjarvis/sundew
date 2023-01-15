@@ -21,8 +21,7 @@ test(strings.print_string)(
         lambda: patched["sys.stdout"].getvalue() == "123\n",
         lambda: arg["a"] == "123",
     ],
-)
-test(strings.print_string)(
+)(
     input={"a": "456"},
     patches={"sys.stdout": io.StringIO()},
     side_effects=[
