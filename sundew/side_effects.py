@@ -1,6 +1,6 @@
 import ast
 import inspect
-from typing import Callable
+from typing import Any, Callable
 
 
 # Generate assert statement from a Compare node
@@ -53,7 +53,7 @@ class SideEffectGetter(ast.NodeTransformer):
         return self.lambda_sources
 
 
-def get_source(funcs: list[Callable[[], None]]) -> set[str]:
+def get_source(funcs: list[Callable[[Any], bool]]) -> set[str]:
     side_effects = SideEffectGetter()
     for func in funcs:
         code_string = inspect.getsource(func).strip()

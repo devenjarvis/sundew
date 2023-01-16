@@ -3,7 +3,7 @@ import copy
 from functools import wraps
 import sys
 import asyncio
-from typing import Any, Callable, Coroutine
+from typing import Any, Callable, Coroutine, Type
 import inspect
 import importlib
 from sundew.config import config
@@ -11,6 +11,7 @@ from sundew.types import FunctionTest
 from sundew.side_effects import ConvertSideEffect, get_source
 from contextlib import ExitStack
 from unittest.mock import patch
+from pydantic import BaseConfig, create_model, BaseModel
 from rich import print
 from rich.progress import (
     Progress,
@@ -21,10 +22,6 @@ from rich.progress import (
     TaskID,
 )
 import os
-
-
-arg: dict[str, Any] = dict()
-patched: dict[str, Any] = dict()
 
 
 def update_function_graph(fn: Callable) -> None:
@@ -144,6 +141,31 @@ def check_test_output(test: FunctionTest, actual_return: Any) -> None:
             )
 
 
+def build_side_effect_vars(test_function: Callable) -> Type[BaseModel]:
+    # Parse function signature annotations
+    funtion_arguments: dict[str, tuple[Any, Any]] = dict()
+    for name, parameter in inspect.signature(test_function).parameters.items():
+        funtion_arguments[name] = (
+            # parameter or Any,
+            parameter.annotation
+            if parameter.annotation is not inspect.Signature.empty
+            else Any,
+            ...,
+        )
+
+    class Config(BaseConfig):
+        arbitrary_types_allowed = True
+
+    model = create_model(
+        "SideEffectVars",
+        **funtion_arguments,
+        patches=(dict[str, Any], dict()),
+        __config__=Config,
+    )  # type: ignore
+
+    return model
+
+
 def check_test_side_effects(test: FunctionTest, isolated_input: dict[str, Any]) -> None:
     if test.side_effects:
         side_effect_sources = get_source(test.side_effects)
@@ -152,8 +174,11 @@ def check_test_side_effects(test: FunctionTest, isolated_input: dict[str, Any]) 
             side_effect_code = ast.unparse(side_effect_ast)
 
             # Replace variables used by side_effects
-            arg = isolated_input  # noqa: F841
-            patched = test.patches  # noqa: F841
+            # arg = isolated_input  # noqa: F841
+            # patched = test.patches  # noqa: F841
+            # _ = create_model('SideEffectVars', foo=(str, ...), bar=123)
+            SideEffectVarsModel = build_side_effect_vars(test.function)
+            _ = SideEffectVarsModel(patches=test.patches, **isolated_input)
             exec(side_effect_code)
 
 
