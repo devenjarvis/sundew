@@ -21,7 +21,15 @@ test(Graph.dependencies)(
     returns={},
 )
 
-test(Graph.usage)(input={"self": Graph(), "node": "B"}, returns={},)(
-    input={"self": fixtures.setup_simple_graph(), "node": "B"},
+
+test(Graph.usage)(
+    setup={fixtures.setup_empty_graph},
+    input={"self": Graph(), "node": "B"},
+    returns={},
+)
+
+# Note: chained tests break failure links (always link to topmost test)
+test(Graph.usage)(
+    input={"self": fixtures.setup_empty_graph, "node": "B"},
     returns={"A"},
 )

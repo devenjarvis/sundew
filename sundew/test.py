@@ -1,15 +1,14 @@
 import ast
-import copy
 from functools import wraps
 import sys
 import asyncio
-from typing import Any, Callable, Coroutine, Type
+from typing import Any, Callable, Coroutine, Type, Generator
 import inspect
 import importlib
 from sundew.config import config
 from sundew.types import FunctionTest
 from sundew.side_effects import ConvertSideEffect, get_source
-from contextlib import ExitStack
+from contextlib import AbstractContextManager, ExitStack
 from unittest.mock import patch
 from pydantic import BaseConfig, create_model, BaseModel
 from rich import print
@@ -68,6 +67,7 @@ def get_test_function(fn: Callable) -> Callable | Coroutine:
 
 def test(fn) -> Callable:
     def add_test(
+        setup: set[Generator[Any, None, None]] = set(),
         input: dict = dict(),
         returns: Any | None = None,
         patches: dict = dict(),
@@ -77,11 +77,12 @@ def test(fn) -> Callable:
 
         config.tests.append(
             FunctionTest(
-                location=f"{os.path.relpath(inspect.stack()[1][1])}:{inspect.stack()[1][2]}",
                 function=get_test_function(fn),
                 input=input,
-                returns=returns,
+                location=f"{os.path.relpath(inspect.stack()[1][1])}:{inspect.stack()[1][2]}",
                 patches=patches,
+                returns=returns,
+                setup=setup,
                 side_effects=side_effects,
             )
         )
@@ -97,14 +98,36 @@ def apply_patches(test: FunctionTest, stack: ExitStack):
             stack.enter_context(patch(target, new))
 
 
+def apply_fixtures(test: FunctionTest, stack: ExitStack):
+    fixture_yields = {}
+    if test.setup:
+        for fixture in test.setup:
+            fixture_yield = stack.enter_context(fixture())
+            fixture_yields[fixture.__name__] = fixture_yield
+
+    return fixture_yields
+
+
 def copy_function_inputs(test: FunctionTest) -> dict[str, Any]:
+    isolated_inputs: dict[str, Any] = {}
     signature = inspect.signature(test.function)
-    defaults = {
+    isolated_inputs = {
         k: v.default
         for k, v in signature.parameters.items()
         if v.default is not inspect.Parameter.empty
     }
-    return copy.deepcopy(defaults | test.input)
+
+    for arg_name, input_value in test.input.items():
+        if callable(input_value):
+            if isinstance(input_value(), AbstractContextManager):
+                with input_value() as input_val:
+                    result = input_val
+            else:
+                result = input_value()
+        else:
+            result = input_value
+        isolated_inputs[arg_name] = result
+    return isolated_inputs
 
 
 def run_function(test: FunctionTest, isolated_input: dict[str, Any]) -> dict[str, Any]:
@@ -188,6 +211,8 @@ def run_test(
     try:
         # programmatically apply any patches defined
         apply_patches(test, stack)
+        # programmatically apply any fixtures setup
+        apply_fixtures(test, stack)
         try:
             # Isolate input arguments
             isolated_input = copy_function_inputs(test)
