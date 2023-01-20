@@ -3,9 +3,10 @@ from typing import Any, Callable
 
 
 class FunctionTest(BaseModel):
-    location: str
     function: Callable
     input: dict[str, Any] = dict()
-    returns: Any | None = None
+    location: str
     patches: dict[str, Any] = dict()
+    returns: Any | None = None
+    setup: set[Callable] = set()
     side_effects: list[Callable[[Any], bool]] = []
