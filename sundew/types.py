@@ -1,12 +1,13 @@
-from pydantic import BaseModel
 from typing import Any, Callable
+
+from pydantic import BaseModel
 
 
 class FunctionTest(BaseModel):
     function: Callable
-    input: dict[str, Any] = dict()
+    kwargs: dict[str, Any] = {}
     location: str
-    patches: dict[str, Any] = dict()
+    patches: dict[str, Any] = {}
     returns: Any | None = None
     setup: set[Callable] = set()
     side_effects: list[Callable[[Any], bool]] = []

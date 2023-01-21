@@ -1,18 +1,18 @@
-from sundew.config import config
-from sundew import test
-
-import typer
 import importlib
 import importlib.util
-import sys
 import os
+import sys
 
+import typer
+
+from sundew import test
+from sundew.config import config
 
 app = typer.Typer()
 
 
 @app.command()
-def run(module: str):
+def run(module: str) -> None:
     config.modules = {"module.name"}
 
     if os.path.isdir(module):
@@ -20,7 +20,8 @@ def run(module: str):
             for f in fnames:
                 if f.endswith(".py"):
                     if spec := importlib.util.spec_from_file_location(
-                        "module.name", os.path.join(dirpath, f)
+                        "module.name",
+                        os.path.join(dirpath, f),
                     ):
                         imported_module = importlib.util.module_from_spec(spec)
                         sys.modules["module.name"] = imported_module
