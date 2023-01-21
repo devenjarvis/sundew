@@ -12,7 +12,13 @@ app = typer.Typer()
 
 
 @app.command()
-def run(module: str) -> None:
+def run(
+    module: str,
+    function: str = typer.Option(  # noqa: B008
+        "",
+        help="Run all tests for this function.",
+    ),
+) -> None:
     config.modules = {"module.name"}
 
     if os.path.isdir(module):
@@ -42,7 +48,7 @@ def run(module: str) -> None:
         else:
             ...
 
-    test.run()
+    test.run(function_name=function)
 
 
 if __name__ == "__main__":
