@@ -23,15 +23,11 @@ def square_root(a: int) -> float:
 
 def quadratic(a: int, b: int, c: int) -> tuple[float, float]:
     positive_solution = (
-        negative(b) + square_root((square(b) - product(4, product(a, c))))
+        negative(b) + square_root(square(b) - product(4, product(a, c)))
     ) / product(2, a)
 
     negative_solution = (
-        negative(b) - square_root((square(b) - product(4, product(a, c))))
+        negative(b) - square_root(square(b) - product(4, product(a, c)))
     ) / product(2, a)
 
     return (positive_solution, negative_solution)
-
-
-# def error(a: int):
-#     raise Exception("Something failed!")
