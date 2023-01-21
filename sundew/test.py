@@ -250,14 +250,33 @@ def run_test(
         progress.advance(tests_ran)
 
 
-def run() -> None:
+def run(function_name: str) -> None:
     with Progress(
         TextColumn("{task.description}"),
         BarColumn(),
         MofNCompleteColumn(),
         TimeElapsedColumn(),
     ) as progress:
-        tests_ran = progress.add_task("Running tests...", total=len(config.tests))
-        for test in config.tests:
+        # Default to select all tests
+        selected_tests = config.tests
+
+        # Select function tests if provided
+        if function_name:
+            selected_tests = [
+                test
+                for test in config.tests
+                if test.function.__name__ == function_name
+                or test.function.__qualname__ == function_name
+            ]
+            progress.console.print(
+                f"Dependency graph for function: {config.function_graph.dep_graph[function_name]}",
+            )
+            progress.console.print(
+                f"Selected {len(selected_tests)}/{len(config.tests)} tests",
+            )
+
+        tests_ran = progress.add_task("Running tests...", total=len(selected_tests))
+        # Run all selecte tests
+        for test in selected_tests:
             with ExitStack() as stack:
                 run_test(test, stack, tests_ran, progress)
