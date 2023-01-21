@@ -16,6 +16,8 @@ def run(
     module: str,
     function: str = typer.Option(  # noqa: B008
         "",
+        "--function",
+        "-f",
         help="Run all tests for this function.",
     ),
 ) -> None:
