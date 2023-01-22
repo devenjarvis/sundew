@@ -25,7 +25,7 @@ from sundew.side_effects import ConvertSideEffect, get_source
 from sundew.types import FunctionTest
 
 
-def update_function_graph(fn: Callable) -> None:
+def update_test_graph(fn: Callable) -> None:
     func_name = fn.__code__.co_name
     # Don't check this wrapper function
     if func_name != "sundew_test_wrapper":
@@ -47,9 +47,7 @@ def update_function_graph(fn: Callable) -> None:
                     )
                     # Only connect functions within the module
                     if parent_module in config.modules:
-                        config.function_graph.add_connections(
-                            [(func_name, sub_func_name)],
-                        )
+                        config.test_graph.add_connection(func_name, sub_func_name)
         else:
             print("Not sure how we get here yet")
 
@@ -82,9 +80,9 @@ def test(fn: Callable) -> Callable:
         patches: dict | None = None,
         side_effects: list[Callable] | None = None,
     ) -> Callable:
-        update_function_graph(fn)
+        update_test_graph(fn)
 
-        config.tests.append(
+        config.test_graph.add_test(
             FunctionTest(
                 function=get_test_function(fn),
                 kwargs=kwargs or {},
@@ -93,7 +91,7 @@ def test(fn: Callable) -> Callable:
                 returns=returns,
                 setup=setup or set(),
                 side_effects=side_effects or [],
-            ),
+            )
         )
 
         return add_test
@@ -257,25 +255,47 @@ def run(function_name: str) -> None:
         MofNCompleteColumn(),
         TimeElapsedColumn(),
     ) as progress:
-        # Default to select all tests
-        selected_tests = config.tests
+
+        total_num_tests = sum(
+            len(func.tests) for func in config.test_graph.functions.values()
+        )
 
         # Select function tests if provided
         if function_name:
+            selected_tests = config.test_graph.functions[function_name].tests
+            progress.console.print(
+                f"Dependency graph for function: {config.test_graph.functions[function_name].deps}",
+            )
+            progress.console.print(
+                f"Selected {len(selected_tests)}/{total_num_tests} tests",
+            )
+        else:  # Else get all tests
             selected_tests = [
                 test
-                for test in config.tests
-                if test.function.__name__ == function_name
-                or test.function.__qualname__ == function_name
+                for func in config.test_graph.functions.values()
+                for test in func.tests
             ]
-            progress.console.print(
-                f"Dependency graph for function: {config.function_graph.dep_graph[function_name]}",
-            )
-            progress.console.print(
-                f"Selected {len(selected_tests)}/{len(config.tests)} tests",
-            )
 
         tests_ran = progress.add_task("Running tests...", total=len(selected_tests))
+
+        # sorted_tests = []
+        # for test in selected_tests:
+        #     sorted_usage = {
+        #         k: v
+        #         for k, v in sorted(
+        #             config.test_graph.usage_graph.items(),
+        #             key=lambda item: len(item),
+        #         )
+        #     }
+        #     for func in sorted_usage:
+        #         sorted_tests.append(func)
+
+        progress.console.print(
+            f"Test function order before: {selected_tests}",
+        )
+        # progress.console.print(
+        #     f"Test function order after: {sorted_tests}",
+        # )
         # Run all selecte tests
         for test in selected_tests:
             with ExitStack() as stack:

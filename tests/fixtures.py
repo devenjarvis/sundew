@@ -11,7 +11,7 @@ from sundew.types import FunctionTest
 def setup_empty_graph() -> Generator[Graph, None, None]:
     try:
         new_graph = Graph()
-        new_graph.add("A", "B")
+        new_graph.add_connection("A", "B")
         yield new_graph
     finally:
         # cleanup

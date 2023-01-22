@@ -2,7 +2,7 @@ from sundew import test as sundew_test
 from sundew.test import test
 from tests import fixtures
 
-# test(sundew_test.update_function_graph)(
+# test(sundew_test.update_test_graph)(
 #   Not isolated, stopping here...
 
 # test(sundew_test.get_test_function)(

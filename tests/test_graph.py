@@ -2,17 +2,10 @@ from sundew.graph import Graph
 from sundew.test import test
 from tests import fixtures
 
-test(Graph.add_connections)(
-    kwargs={"self": Graph(), "connections": [("A", "B")]},
-    side_effects=[
-        lambda _: _.self.dep_graph["A"] == {"B"},
-    ],
-)
-
-test(Graph.add)(
+test(Graph.add_connection)(
     kwargs={"self": Graph(), "node1": "A", "node2": "B"},
     side_effects=[
-        lambda _: _.self.dep_graph["A"] == {"B"},
+        lambda _: _.self.functions["A"].deps == {"B"},
     ],
 )
 

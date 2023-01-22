@@ -6,8 +6,7 @@ from sundew.types import FunctionTest
 
 class Configuration(BaseSettings):
     modules: set[str] = set()
-    function_graph: Graph = Graph()
-    tests: list[FunctionTest] = []
+    test_graph: Graph = Graph()
 
 
 config = Configuration()
