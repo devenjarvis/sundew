@@ -26,7 +26,7 @@ from sundew.types import FunctionTest
 
 
 def update_test_graph(fn: Callable) -> None:
-    func_name = fn.__code__.co_name
+    func_name = fn.__name__
     # Don't check this wrapper function
     if func_name != "sundew_test_wrapper":
         # Get package_name, module_name, and module
@@ -40,13 +40,14 @@ def update_test_graph(fn: Callable) -> None:
                 # We only care about functions in the modules being tested
                 if hasattr(imported_module, sub_func_name):
                     # Verify that the funcion is native to the modules being tested
+                    function = getattr(imported_module, sub_func_name)
                     parent_module = getattr(
-                        getattr(imported_module, sub_func_name),
+                        function,
                         "__module__",
                         None,
                     )
                     # Only connect functions within the module
-                    if parent_module in config.modules:
+                    if parent_module in config.modules and inspect.isfunction(function):
                         config.test_graph.add_connection(func_name, sub_func_name)
         else:
             print("Not sure how we get here yet")
@@ -152,22 +153,21 @@ def check_test_exception(test: FunctionTest, e: Exception) -> None:
 
 
 def check_test_output(test: FunctionTest, actual_return: Any) -> None:  # noqa: ANN401
-    if test.returns:
-        if isinstance(actual_return, ast.Module):
-            assert (
-                ast.unparse(actual_return).strip() == ast.unparse(test.returns).strip()
-            ), (
-                f"Input {test.kwargs} returned AST for "
-                + f"{ast.unparse(actual_return).strip()} "
-                + "which does not match the expected AST for "
-                + f"{ast.unparse(test.returns).strip()}"
-            )
-        else:
-            assert actual_return == test.returns, (
-                f"Input {test.kwargs} returned {actual_return} "
-                + "which does not match the expected return of "
-                + f"{test.returns}"
-            )
+    if isinstance(actual_return, ast.Module):
+        assert (
+            ast.unparse(actual_return).strip() == ast.unparse(test.returns).strip()
+        ), (
+            f"Input {test.kwargs} returned AST for "
+            + f"{ast.unparse(actual_return).strip()} "
+            + "which does not match the expected AST for "
+            + f"{ast.unparse(test.returns).strip()}"
+        )
+    else:
+        assert actual_return == test.returns, (
+            f"Input {test.kwargs} returned {actual_return} "
+            + "which does not match the expected return of "
+            + f"{test.returns}"
+        )
 
 
 def build_side_effect_vars(test_function: Callable) -> type[BaseModel]:
@@ -221,6 +221,7 @@ def run_test(
             isolated_input = copy_function_inputs(test)
             # Run the test function once for evaluation
             actual_return = run_function(test, isolated_input)
+            print(actual_return)
         except Exception as e:  # noqa: BLE001
             # If we get an exception, check if it's expected
             check_test_exception(test, e)
@@ -248,6 +249,48 @@ def run_test(
         progress.advance(tests_ran)
 
 
+def select_tests(function_name: str, progress: Progress) -> list[str]:
+    total_num_tests = sum(
+        len(func.tests) for func in config.test_graph.functions.values()
+    )
+
+    # Select function tests if provided
+    if function_name:
+        selected_tests = [function_name]
+    else:  # Else get all tests
+        selected_tests = [
+            key
+            for key in config.test_graph.functions.keys()
+            if len(config.test_graph.functions[key].tests) > 0
+        ]
+
+    progress.console.print(
+        f"Selected {len(selected_tests)}/{total_num_tests} tests",
+    )
+
+    return selected_tests
+
+
+def sort_tests(selected_tests: list[str]) -> list[FunctionTest]:
+    # Kahn's algo to topologically sort test_graph
+    all_nodes_added = False
+    num_visited_nodes = 0
+    sorted_tests: list[FunctionTest] = []
+
+    while not all_nodes_added:
+        for func_name in selected_tests:
+            func = config.test_graph.functions[func_name]
+            if len(func.deps) - num_visited_nodes == 0:
+                sorted_tests.extend(func.tests)
+
+        if len(sorted_tests) == len(selected_tests):
+            all_nodes_added = True
+        else:
+            num_visited_nodes += 1
+
+    return sorted_tests
+
+
 def run(function_name: str) -> None:
     with Progress(
         TextColumn("{task.description}"),
@@ -256,34 +299,29 @@ def run(function_name: str) -> None:
         TimeElapsedColumn(),
     ) as progress:
 
-        total_num_tests = sum(
-            len(func.tests) for func in config.test_graph.functions.values()
-        )
+        selected_tests = select_tests(function_name, progress)
+        sorted_tests = sort_tests(selected_tests)
 
-        # Select function tests if provided
-        if function_name:
-            selected_tests = config.test_graph.functions[function_name].tests
-            progress.console.print(
-                f"Dependency graph for function: {config.test_graph.functions[function_name].deps}",
-            )
-            progress.console.print(
-                f"Selected {len(selected_tests)}/{total_num_tests} tests",
-            )
-        else:  # Else get all tests
-            selected_tests = [
-                test
-                for func in config.test_graph.functions.values()
-                for test in func.tests
-            ]
-
-        tests_ran = progress.add_task("Running tests...", total=len(selected_tests))
-
-        # Kahn's algo to topologically sort test_graph???
+        tests_ran = progress.add_task("Running tests...", total=len(sorted_tests))
 
         progress.console.print(
             f"Test function order before: {selected_tests}",
         )
+        progress.console.print(
+            "Dependencies: "
+            + str(
+                [
+                    (func_name, func.deps)
+                    for func_name, func in config.test_graph.functions.items()
+                    if func_name in selected_tests
+                ]
+            ),
+        )
+        progress.console.print(
+            f"Test function order after: {[test.function.__name__ for test in sorted_tests]}",
+        )
+
         # Run all selecte tests
-        for test in selected_tests:
+        for test in sorted_tests:
             with ExitStack() as stack:
                 run_test(test, stack, tests_ran, progress)

@@ -50,6 +50,17 @@ passing_function_test_with_defaults = FunctionTest(
     returns="hello1",
 )
 
+
+def setup_simple_test_graph() -> Graph:
+    new_graph = Graph()
+    new_graph.add_connection(
+        "passing_function_test", "passing_function_test_with_defaults"
+    )
+    new_graph.add_test(passing_function_test)
+    new_graph.add_test(passing_function_test_with_defaults)
+    return new_graph
+
+
 passing_function_test_with_fixtures = FunctionTest(
     location="tests/fixtures.py:1000",
     fixtures={setup_empty_graph},
