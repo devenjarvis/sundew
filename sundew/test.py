@@ -278,24 +278,11 @@ def run(function_name: str) -> None:
 
         tests_ran = progress.add_task("Running tests...", total=len(selected_tests))
 
-        # sorted_tests = []
-        # for test in selected_tests:
-        #     sorted_usage = {
-        #         k: v
-        #         for k, v in sorted(
-        #             config.test_graph.usage_graph.items(),
-        #             key=lambda item: len(item),
-        #         )
-        #     }
-        #     for func in sorted_usage:
-        #         sorted_tests.append(func)
+        # Kahn's algo to topologically sort test_graph???
 
         progress.console.print(
             f"Test function order before: {selected_tests}",
         )
-        # progress.console.print(
-        #     f"Test function order after: {sorted_tests}",
-        # )
         # Run all selecte tests
         for test in selected_tests:
             with ExitStack() as stack:

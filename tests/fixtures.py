@@ -20,7 +20,7 @@ def setup_empty_graph() -> Generator[Graph, None, None]:
 
 def setup_simple_graph_2() -> Graph:
     new_graph = Graph()
-    new_graph.add("A", "B")
+    new_graph.add_connection("A", "B")
     return new_graph
 
 
@@ -33,7 +33,7 @@ def example_fn_2(a: int, b: str = "hello") -> str:
 
 
 def example_fn_3(graph: Graph) -> None:
-    graph.add("C", "D")
+    graph.add_connection("C", "D")
 
 
 passing_function_test = FunctionTest(

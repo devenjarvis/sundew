@@ -35,5 +35,5 @@ type = "mypy ."
 [tool.ruff]
 line-length = 100
 select = ["ALL"]
-ignore = ["D", "T", "ISC", "S101", "ANN101"]
+ignore = ["D", "T", "ISC", "S101", "ANN101", "COM812"]
 

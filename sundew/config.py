@@ -1,7 +1,6 @@
 from pydantic import BaseSettings
 
 from sundew.graph import Graph
-from sundew.types import FunctionTest
 
 
 class Configuration(BaseSettings):

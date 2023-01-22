@@ -1,6 +1,6 @@
-from collections import defaultdict
-from sundew.types import FunctionTest
 from dataclasses import dataclass, field
+
+from sundew.types import FunctionTest
 
 
 @dataclass(slots=True)
