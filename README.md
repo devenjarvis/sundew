@@ -23,13 +23,14 @@ Major things that still need to be done before making public (in rough order):
 - [ ] Implement untested sub-function detection
 - [ ] Implement automatic sub-function test cases
 - [ ] Parallel test runner support
+- [ ] Mutation testing/coverage reporting
 - [ ] Write more tests for sundew
+- [ ] Improve error handling/reporting (right now we throw a lot of exceptions)
 - [ ] Documentation
 - [ ] Add code of conduct
 - [ ] Add contribution guidelines
 - [x] Setup Github Actions to run CI on PR
 - [x] Setup Github Actions to release new versions to PyPi
-- [ ] Mutation testing/coverage reporting
 - [ ] Release version 0.1.0 to PyPi
 
 Future items to look into:

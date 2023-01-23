@@ -77,3 +77,34 @@ class SideEffectVars(BaseModel):
 class ExampleSideEffectVars(SideEffectVars):
     a: int
     b: str
+
+
+def dependent_func() -> str:
+    return "hello"
+
+
+def callee_func() -> str:
+    first_word = dependent_func()
+    second_word = "world"
+    return ", ".join([first_word, second_word])
+
+
+dependent_func_function_test = FunctionTest(
+    location="tests/fixtures.py:1000",
+    function=dependent_func,
+    returns="hello",
+)
+
+callee_func_function_test = FunctionTest(
+    location="tests/fixtures.py:1000",
+    function=callee_func,
+    returns="hello, world",
+)
+
+
+def setup_test_graph_with_dependency() -> Graph:
+    new_graph = Graph()
+    new_graph.add_connection("callee_func", "dependent_func")
+    new_graph.add_test(dependent_func_function_test)
+    new_graph.add_test(callee_func_function_test)
+    return new_graph

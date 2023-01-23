@@ -11,13 +11,13 @@ test(Graph.add_connection)(
 
 test(Graph.dependencies)(
     kwargs={"self": Graph(), "node": "A"},
-    returns={},
+    returns=set(),
 )
 
 test(Graph.usage)(
     setup={fixtures.setup_empty_graph},
     kwargs={"self": Graph(), "node": "B"},
-    returns={},
+    returns=set(),
 )
 
 # Note: chained tests break failure links (always link to top most test)

@@ -153,7 +153,7 @@ def check_test_exception(test: FunctionTest, e: Exception) -> None:
 
 
 def check_test_output(test: FunctionTest, actual_return: Any) -> None:  # noqa: ANN401
-    if isinstance(actual_return, ast.Module):
+    if isinstance(actual_return, ast.Module) and isinstance(test.returns, ast.Module):
         assert (
             ast.unparse(actual_return).strip() == ast.unparse(test.returns).strip()
         ), (
@@ -221,7 +221,6 @@ def run_test(
             isolated_input = copy_function_inputs(test)
             # Run the test function once for evaluation
             actual_return = run_function(test, isolated_input)
-            print(actual_return)
         except Exception as e:  # noqa: BLE001
             # If we get an exception, check if it's expected
             check_test_exception(test, e)
@@ -249,41 +248,34 @@ def run_test(
         progress.advance(tests_ran)
 
 
-def select_tests(function_name: str, progress: Progress) -> list[str]:
-    total_num_tests = sum(
-        len(func.tests) for func in config.test_graph.functions.values()
-    )
-
+def select_functions_to_test(function_name: str) -> list[str]:
     # Select function tests if provided
     if function_name:
-        selected_tests = [function_name]
+        selected_functions = [function_name]
     else:  # Else get all tests
-        selected_tests = [
+        selected_functions = [
             key
-            for key in config.test_graph.functions.keys()
+            for key in config.test_graph.functions
             if len(config.test_graph.functions[key].tests) > 0
         ]
 
-    progress.console.print(
-        f"Selected {len(selected_tests)}/{total_num_tests} tests",
-    )
-
-    return selected_tests
+    return selected_functions
 
 
-def sort_tests(selected_tests: list[str]) -> list[FunctionTest]:
+def sort_tests(selected_functions: list[str]) -> list[FunctionTest]:
     # Kahn's algo to topologically sort test_graph
     all_nodes_added = False
     num_visited_nodes = 0
     sorted_tests: list[FunctionTest] = []
+    functions_sorted = []
 
     while not all_nodes_added:
-        for func_name in selected_tests:
+        for func_name in selected_functions:
             func = config.test_graph.functions[func_name]
             if len(func.deps) - num_visited_nodes == 0:
                 sorted_tests.extend(func.tests)
-
-        if len(sorted_tests) == len(selected_tests):
+                functions_sorted.append(func_name)
+        if len(functions_sorted) == len(selected_functions):
             all_nodes_added = True
         else:
             num_visited_nodes += 1
@@ -299,27 +291,18 @@ def run(function_name: str) -> None:
         TimeElapsedColumn(),
     ) as progress:
 
-        selected_tests = select_tests(function_name, progress)
-        sorted_tests = sort_tests(selected_tests)
+        total_num_tests = sum(
+            len(func.tests) for func in config.test_graph.functions.values()
+        )
+
+        selected_functions = select_functions_to_test(function_name)
+        sorted_tests = sort_tests(selected_functions)
+
+        progress.console.print(
+            f"Selected {len(sorted_tests)}/{total_num_tests} tests",
+        )
 
         tests_ran = progress.add_task("Running tests...", total=len(sorted_tests))
-
-        progress.console.print(
-            f"Test function order before: {selected_tests}",
-        )
-        progress.console.print(
-            "Dependencies: "
-            + str(
-                [
-                    (func_name, func.deps)
-                    for func_name, func in config.test_graph.functions.items()
-                    if func_name in selected_tests
-                ]
-            ),
-        )
-        progress.console.print(
-            f"Test function order after: {[test.function.__name__ for test in sorted_tests]}",
-        )
 
         # Run all selecte tests
         for test in sorted_tests:
