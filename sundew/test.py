@@ -25,8 +25,8 @@ from sundew.side_effects import ConvertSideEffect, get_source
 from sundew.types import FunctionTest
 
 
-def update_function_graph(fn: Callable) -> None:
-    func_name = fn.__code__.co_name
+def update_test_graph(fn: Callable) -> None:
+    func_name = fn.__name__
     # Don't check this wrapper function
     if func_name != "sundew_test_wrapper":
         # Get package_name, module_name, and module
@@ -40,16 +40,15 @@ def update_function_graph(fn: Callable) -> None:
                 # We only care about functions in the modules being tested
                 if hasattr(imported_module, sub_func_name):
                     # Verify that the funcion is native to the modules being tested
+                    function = getattr(imported_module, sub_func_name)
                     parent_module = getattr(
-                        getattr(imported_module, sub_func_name),
+                        function,
                         "__module__",
                         None,
                     )
                     # Only connect functions within the module
-                    if parent_module in config.modules:
-                        config.function_graph.add_connections(
-                            [(func_name, sub_func_name)],
-                        )
+                    if parent_module in config.modules and inspect.isfunction(function):
+                        config.test_graph.add_connection(func_name, sub_func_name)
         else:
             print("Not sure how we get here yet")
 
@@ -82,9 +81,9 @@ def test(fn: Callable) -> Callable:
         patches: dict | None = None,
         side_effects: list[Callable] | None = None,
     ) -> Callable:
-        update_function_graph(fn)
+        update_test_graph(fn)
 
-        config.tests.append(
+        config.test_graph.add_test(
             FunctionTest(
                 function=get_test_function(fn),
                 kwargs=kwargs or {},
@@ -93,7 +92,7 @@ def test(fn: Callable) -> Callable:
                 returns=returns,
                 setup=setup or set(),
                 side_effects=side_effects or [],
-            ),
+            )
         )
 
         return add_test
@@ -154,22 +153,21 @@ def check_test_exception(test: FunctionTest, e: Exception) -> None:
 
 
 def check_test_output(test: FunctionTest, actual_return: Any) -> None:  # noqa: ANN401
-    if test.returns:
-        if isinstance(actual_return, ast.Module):
-            assert (
-                ast.unparse(actual_return).strip() == ast.unparse(test.returns).strip()
-            ), (
-                f"Input {test.kwargs} returned AST for "
-                + f"{ast.unparse(actual_return).strip()} "
-                + "which does not match the expected AST for "
-                + f"{ast.unparse(test.returns).strip()}"
-            )
-        else:
-            assert actual_return == test.returns, (
-                f"Input {test.kwargs} returned {actual_return} "
-                + "which does not match the expected return of "
-                + f"{test.returns}"
-            )
+    if isinstance(actual_return, ast.Module) and isinstance(test.returns, ast.Module):
+        assert (
+            ast.unparse(actual_return).strip() == ast.unparse(test.returns).strip()
+        ), (
+            f"Input {test.kwargs} returned AST for "
+            + f"{ast.unparse(actual_return).strip()} "
+            + "which does not match the expected AST for "
+            + f"{ast.unparse(test.returns).strip()}"
+        )
+    else:
+        assert actual_return == test.returns, (
+            f"Input {test.kwargs} returned {actual_return} "
+            + "which does not match the expected return of "
+            + f"{test.returns}"
+        )
 
 
 def build_side_effect_vars(test_function: Callable) -> type[BaseModel]:
@@ -250,6 +248,41 @@ def run_test(
         progress.advance(tests_ran)
 
 
+def select_functions_to_test(function_name: str) -> list[str]:
+    # Select function tests if provided
+    if function_name:
+        selected_functions = [function_name]
+    else:  # Else get all tests
+        selected_functions = [
+            key
+            for key in config.test_graph.functions
+            if len(config.test_graph.functions[key].tests) > 0
+        ]
+
+    return selected_functions
+
+
+def sort_tests(selected_functions: list[str]) -> list[FunctionTest]:
+    # Kahn's algo to topologically sort test_graph
+    all_nodes_added = False
+    num_visited_nodes = 0
+    sorted_tests: list[FunctionTest] = []
+    functions_sorted = []
+
+    while not all_nodes_added:
+        for func_name in selected_functions:
+            func = config.test_graph.functions[func_name]
+            if len(func.deps) - num_visited_nodes == 0:
+                sorted_tests.extend(func.tests)
+                functions_sorted.append(func_name)
+        if len(functions_sorted) == len(selected_functions):
+            all_nodes_added = True
+        else:
+            num_visited_nodes += 1
+
+    return sorted_tests
+
+
 def run(function_name: str) -> None:
     with Progress(
         TextColumn("{task.description}"),
@@ -257,26 +290,21 @@ def run(function_name: str) -> None:
         MofNCompleteColumn(),
         TimeElapsedColumn(),
     ) as progress:
-        # Default to select all tests
-        selected_tests = config.tests
 
-        # Select function tests if provided
-        if function_name:
-            selected_tests = [
-                test
-                for test in config.tests
-                if test.function.__name__ == function_name
-                or test.function.__qualname__ == function_name
-            ]
-            progress.console.print(
-                f"Dependency graph for function: {config.function_graph.dep_graph[function_name]}",
-            )
-            progress.console.print(
-                f"Selected {len(selected_tests)}/{len(config.tests)} tests",
-            )
+        total_num_tests = sum(
+            len(func.tests) for func in config.test_graph.functions.values()
+        )
 
-        tests_ran = progress.add_task("Running tests...", total=len(selected_tests))
+        selected_functions = select_functions_to_test(function_name)
+        sorted_tests = sort_tests(selected_functions)
+
+        progress.console.print(
+            f"Selected {len(sorted_tests)}/{total_num_tests} tests",
+        )
+
+        tests_ran = progress.add_task("Running tests...", total=len(sorted_tests))
+
         # Run all selecte tests
-        for test in selected_tests:
+        for test in sorted_tests:
             with ExitStack() as stack:
                 run_test(test, stack, tests_ran, progress)

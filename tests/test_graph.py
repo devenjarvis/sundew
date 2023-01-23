@@ -2,29 +2,22 @@ from sundew.graph import Graph
 from sundew.test import test
 from tests import fixtures
 
-test(Graph.add_connections)(
-    kwargs={"self": Graph(), "connections": [("A", "B")]},
-    side_effects=[
-        lambda _: _.self.dep_graph["A"] == {"B"},
-    ],
-)
-
-test(Graph.add)(
+test(Graph.add_connection)(
     kwargs={"self": Graph(), "node1": "A", "node2": "B"},
     side_effects=[
-        lambda _: _.self.dep_graph["A"] == {"B"},
+        lambda _: _.self.functions["A"].deps == {"B"},
     ],
 )
 
 test(Graph.dependencies)(
     kwargs={"self": Graph(), "node": "A"},
-    returns={},
+    returns=set(),
 )
 
 test(Graph.usage)(
     setup={fixtures.setup_empty_graph},
     kwargs={"self": Graph(), "node": "B"},
-    returns={},
+    returns=set(),
 )
 
 # Note: chained tests break failure links (always link to top most test)

@@ -19,16 +19,18 @@ Major things that still need to be done before making public (in rough order):
 - [ ] ~Figure out test naming~ (Decided for now, this isn't necessary)
 - [x] Basic test selection support (Can select tests by function name with --function option)
 - [x] Asyncio support/examples (basic implementation)
-- [ ] Implement smart test runner
-- [ ] Implement automatic sub-function test cases
+- [x] Implement smart test runner
 - [ ] Implement untested sub-function detection
+- [ ] Implement automatic sub-function test cases
 - [ ] Parallel test runner support
+- [ ] Mutation testing/coverage reporting
+- [ ] Write more tests for sundew
+- [ ] Improve error handling/reporting (right now we throw a lot of exceptions)
 - [ ] Documentation
 - [ ] Add code of conduct
 - [ ] Add contribution guidelines
 - [x] Setup Github Actions to run CI on PR
 - [x] Setup Github Actions to release new versions to PyPi
-- [ ] Mutation testing/coverage reporting
 - [ ] Release version 0.1.0 to PyPi
 
 Future items to look into:

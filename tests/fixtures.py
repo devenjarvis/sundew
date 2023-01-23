@@ -11,7 +11,7 @@ from sundew.types import FunctionTest
 def setup_empty_graph() -> Generator[Graph, None, None]:
     try:
         new_graph = Graph()
-        new_graph.add("A", "B")
+        new_graph.add_connection("A", "B")
         yield new_graph
     finally:
         # cleanup
@@ -20,7 +20,7 @@ def setup_empty_graph() -> Generator[Graph, None, None]:
 
 def setup_simple_graph_2() -> Graph:
     new_graph = Graph()
-    new_graph.add("A", "B")
+    new_graph.add_connection("A", "B")
     return new_graph
 
 
@@ -33,7 +33,7 @@ def example_fn_2(a: int, b: str = "hello") -> str:
 
 
 def example_fn_3(graph: Graph) -> None:
-    graph.add("C", "D")
+    graph.add_connection("C", "D")
 
 
 passing_function_test = FunctionTest(
@@ -49,6 +49,17 @@ passing_function_test_with_defaults = FunctionTest(
     kwargs={"a": 1},
     returns="hello1",
 )
+
+
+def setup_simple_test_graph() -> Graph:
+    new_graph = Graph()
+    new_graph.add_connection(
+        "passing_function_test", "passing_function_test_with_defaults"
+    )
+    new_graph.add_test(passing_function_test)
+    new_graph.add_test(passing_function_test_with_defaults)
+    return new_graph
+
 
 passing_function_test_with_fixtures = FunctionTest(
     location="tests/fixtures.py:1000",
@@ -66,3 +77,34 @@ class SideEffectVars(BaseModel):
 class ExampleSideEffectVars(SideEffectVars):
     a: int
     b: str
+
+
+def dependent_func() -> str:
+    return "hello"
+
+
+def callee_func() -> str:
+    first_word = dependent_func()
+    second_word = "world"
+    return ", ".join([first_word, second_word])
+
+
+dependent_func_function_test = FunctionTest(
+    location="tests/fixtures.py:1000",
+    function=dependent_func,
+    returns="hello",
+)
+
+callee_func_function_test = FunctionTest(
+    location="tests/fixtures.py:1000",
+    function=callee_func,
+    returns="hello, world",
+)
+
+
+def setup_test_graph_with_dependency() -> Graph:
+    new_graph = Graph()
+    new_graph.add_connection("callee_func", "dependent_func")
+    new_graph.add_test(dependent_func_function_test)
+    new_graph.add_test(callee_func_function_test)
+    return new_graph

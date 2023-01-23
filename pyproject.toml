@@ -27,6 +27,7 @@ fix = "ruff . --fix"
 format = "black ."
 format_check = "black . --check"
 lint = "ruff ."
+sundew = "python -m sundew"
 test_examples = "python -m sundew ./examples"
 test_sundew = "python -m sundew ./tests"
 type = "mypy ."
@@ -35,5 +36,5 @@ type = "mypy ."
 [tool.ruff]
 line-length = 100
 select = ["ALL"]
-ignore = ["D", "T", "ISC", "S101", "ANN101"]
+ignore = ["D", "T", "ISC", "S101", "ANN101", "COM812"]
 
