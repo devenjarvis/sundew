@@ -4,14 +4,14 @@ from typing import Any, Generator
 from pydantic import BaseModel
 
 from sundew.graph import Graph
-from sundew.types import FunctionTest
+from sundew.types import FunctionName, FunctionTest
 
 
 @contextmanager
 def setup_empty_graph() -> Generator[Graph, None, None]:
     try:
         new_graph = Graph()
-        new_graph.add_connection("A", "B")
+        new_graph.add_connection(FunctionName("A"), FunctionName("B"))
         yield new_graph
     finally:
         # cleanup
@@ -20,7 +20,7 @@ def setup_empty_graph() -> Generator[Graph, None, None]:
 
 def setup_simple_graph_2() -> Graph:
     new_graph = Graph()
-    new_graph.add_connection("A", "B")
+    new_graph.add_connection(FunctionName("A"), FunctionName("B"))
     return new_graph
 
 
@@ -33,7 +33,7 @@ def example_fn_2(a: int, b: str = "hello") -> str:
 
 
 def example_fn_3(graph: Graph) -> None:
-    graph.add_connection("C", "D")
+    graph.add_connection(FunctionName("C"), FunctionName("D"))
 
 
 passing_function_test = FunctionTest(
@@ -54,7 +54,8 @@ passing_function_test_with_defaults = FunctionTest(
 def setup_simple_test_graph() -> Graph:
     new_graph = Graph()
     new_graph.add_connection(
-        "passing_function_test", "passing_function_test_with_defaults"
+        FunctionName("passing_function_test"),
+        FunctionName("passing_function_test_with_defaults"),
     )
     new_graph.add_test(passing_function_test)
     new_graph.add_test(passing_function_test_with_defaults)
@@ -104,7 +105,10 @@ callee_func_function_test = FunctionTest(
 
 def setup_test_graph_with_dependency() -> Graph:
     new_graph = Graph()
-    new_graph.add_connection("callee_func", "dependent_func")
+    new_graph.add_connection(
+        FunctionName("callee_func"),
+        FunctionName("dependent_func"),
+    )
     new_graph.add_test(dependent_func_function_test)
     new_graph.add_test(callee_func_function_test)
     return new_graph

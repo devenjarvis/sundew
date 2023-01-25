@@ -79,5 +79,14 @@ test(sundew_test.sort_tests)(
     returns=[],
 )
 
+test(sundew_test.detect_missing_tests)(
+    # Make sure sorting works with only 1 element
+    kwargs={"selected_functions": ["callee_func"]},
+    patches={
+        "sundew.config.config.test_graph": fixtures.setup_test_graph_with_dependency(),
+    },
+    returns=["dependent_func"],
+)
+
 # can't test sundew.test.run due to the fact that we are using it.
 # Not sure if this is surmountable, or if I just need to break it up for better coverage

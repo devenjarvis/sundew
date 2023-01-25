@@ -22,7 +22,7 @@ from rich.progress import (
 
 from sundew.config import config
 from sundew.side_effects import ConvertSideEffect, get_source
-from sundew.types import FunctionTest
+from sundew.types import FunctionName, FunctionTest
 
 
 def update_test_graph(fn: Callable) -> None:
@@ -48,7 +48,16 @@ def update_test_graph(fn: Callable) -> None:
                     )
                     # Only connect functions within the module
                     if parent_module in config.modules and inspect.isfunction(function):
-                        config.test_graph.add_connection(func_name, sub_func_name)
+                        config.test_graph.add_connection(
+                            FunctionName(
+                                simple=func_name,
+                                qualified=".".join([module_name, func_name]),
+                            ),
+                            FunctionName(
+                                simple=sub_func_name,
+                                qualified=".".join([module_name, sub_func_name]),
+                            ),
+                        )
         else:
             print("Not sure how we get here yet")
 
@@ -201,7 +210,7 @@ def check_test_side_effects(test: FunctionTest, isolated_input: dict[str, Any]) 
             side_effect_code = ast.unparse(side_effect_ast)
 
             side_effect_arg_model = build_side_effect_vars(test.function)
-            _ = side_effect_arg_model(patches=test.patches, **isolated_input)
+            _ = side_effect_arg_model.construct(patches=test.patches, **isolated_input)
             exec(side_effect_code)  # noqa: S102
 
 
@@ -283,6 +292,16 @@ def sort_tests(selected_functions: list[str]) -> list[FunctionTest]:
     return sorted_tests
 
 
+def detect_missing_tests(selected_functions: list[str]) -> list[str]:
+    missing_tests: list[str] = []
+    for function in config.test_graph.all_functions():
+        if function not in selected_functions:
+            function_name = config.test_graph.functions[function].name
+            missing_tests.append(function_name.qualified or function_name.simple)
+
+    return missing_tests
+
+
 def run(function_name: str) -> None:
     with Progress(
         TextColumn("{task.description}"),
@@ -297,6 +316,12 @@ def run(function_name: str) -> None:
 
         selected_functions = select_functions_to_test(function_name)
         sorted_tests = sort_tests(selected_functions)
+        missing_tests = detect_missing_tests(selected_functions)
+
+        if missing_tests:
+            progress.console.print(
+                f"WARNING: Missing tests detected for {missing_tests}",
+            )
 
         progress.console.print(
             f"Selected {len(sorted_tests)}/{total_num_tests} tests",

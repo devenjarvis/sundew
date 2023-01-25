@@ -1,13 +1,4 @@
-from dataclasses import dataclass, field
-
-from sundew.types import FunctionTest
-
-
-@dataclass(slots=True)
-class Function:
-    tests: list[FunctionTest] = field(default_factory=list)
-    usage: set[str] = field(default_factory=set)
-    deps: set[str] = field(default_factory=set)
+from sundew.types import Function, FunctionName, FunctionTest
 
 
 class Graph:
@@ -18,27 +9,40 @@ class Graph:
         function_name = test.function.__name__
 
         if function_name not in self.functions:
-            self.functions[function_name] = Function()
+            self.functions[function_name] = Function(
+                name=FunctionName(
+                    simple=function_name,
+                    qualified=test.function.__qualname__,
+                )
+            )
         self.functions[function_name].tests.append(test)
 
-    def add_connection(self, node1: str, node2: str) -> None:
+    def add_connection(self, node1: FunctionName, node2: FunctionName) -> None:
         # Assume connection is directional from A -> B
         # Add connection between node1 and node2
-        if node1 not in self.functions:
-            self.functions[node1] = Function()
-        self.functions[node1].deps.add(node2)
+        if node1.simple not in self.functions:
+            self.functions[node1.simple] = Function(name=node1)
+        self.functions[node1.simple].deps.add(node2.simple)
 
         # Add connection between node2 and node1
-        if node2 not in self.functions:
-            self.functions[node2] = Function()
-        self.functions[node2].usage.add(node1)
+        if node2.simple not in self.functions:
+            self.functions[node2.simple] = Function(name=node2)
+        self.functions[node2.simple].usage.add(node1.simple)
 
     def dependencies(self, node: str) -> set[str]:
         if node not in self.functions:
-            self.functions[node] = Function()
+            self.functions[node] = Function(name=FunctionName(node))
         return self.functions[node].deps
+
+    def all_functions(self) -> set[str]:
+        all_deps = set()
+        for function_under_test in self.functions.values():
+            all_deps.add(function_under_test.name.simple)
+            all_deps.update(function_under_test.deps)
+
+        return all_deps
 
     def usage(self, node: str) -> set[str]:
         if node not in self.functions:
-            self.functions[node] = Function()
+            self.functions[node] = Function(name=FunctionName(node))
         return self.functions[node].usage
