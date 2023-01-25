@@ -20,12 +20,12 @@ Major things that still need to be done before making public (in rough order):
 - [x] Basic test selection support (Can select tests by function name with --function option)
 - [x] Asyncio support/examples (basic implementation)
 - [x] Implement smart test runner
-- [ ] Implement untested sub-function detection
+- [x] Implement untested sub-function detection
 - [ ] Implement automatic sub-function test cases
-- [ ] Parallel test runner support
 - [ ] Mutation testing/coverage reporting
 - [ ] Write more tests for sundew
 - [ ] Improve error handling/reporting (right now we throw a lot of exceptions)
+- [ ] Parallel test runner support (Wait until after 0.1.0???)
 - [ ] Documentation
 - [ ] Add code of conduct
 - [ ] Add contribution guidelines

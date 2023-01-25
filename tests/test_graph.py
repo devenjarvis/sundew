@@ -1,9 +1,14 @@
 from sundew.graph import Graph
 from sundew.test import test
+from sundew.types import FunctionName
 from tests import fixtures
 
 test(Graph.add_connection)(
-    kwargs={"self": Graph(), "node1": "A", "node2": "B"},
+    kwargs={
+        "self": Graph(),
+        "node1": FunctionName("A"),
+        "node2": FunctionName("B"),
+    },
     side_effects=[
         lambda _: _.self.functions["A"].deps == {"B"},
     ],
