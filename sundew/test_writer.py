@@ -61,14 +61,29 @@ def generate_function_dependency_test_file(
         test_strings: set[str] = {test.__str__() for test in mock_fn.calls}
         for test in test_strings:
             generated_test_file += test
-            generated_test_file += "\n\n"
+            generated_test_file += "\n"
 
-    generated_test_file_import_string = "from sundew.test import test\n"
+    generated_test_file_import_string = ""
+    grouped_generated_test_file_imports: dict[str, list[str]] = {
+        "sundew.test": ["test"]
+    }
     for generated_from, generated_import in generated_test_file_imports:
-        generated_test_file_import_string += (
-            f"from {generated_from} import {generated_import}\n"
+        grouped_generated_test_file_imports.setdefault(generated_from, []).append(
+            generated_import
         )
-    generated_test_file_import_string += "\n\n\n"
+    import_paren_limit = 2
+    for grouped_from, grouped_import in sorted(
+        grouped_generated_test_file_imports.items()
+    ):
+        generated_test_file_import_string += "from {} import {}{}{}\n".format(
+            grouped_from,
+            "(\n\t" if len(grouped_import) > import_paren_limit else "",
+            ",\n\t".join(sorted(grouped_import))
+            if len(grouped_import) > import_paren_limit
+            else ", ".join(sorted(grouped_import)),
+            ",\n)" if len(grouped_import) > import_paren_limit else "",
+        )
+    generated_test_file_import_string += "\n"
 
     file_path: str = inspect.getmodule(fn).__file__ or ""  # type: ignore[union-attr]
 
@@ -76,4 +91,7 @@ def generate_function_dependency_test_file(
         with (Path(file_path).resolve().parent / f"auto_test_{fn.__name__}.py").open(
             "w"
         ) as test_file:
-            test_file.write(generated_test_file_import_string + generated_test_file)
+            test_file.write(
+                generated_test_file_import_string.expandtabs(4)
+                + generated_test_file.expandtabs(4)
+            )

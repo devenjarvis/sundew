@@ -48,11 +48,13 @@ class FunctionTest:
         if self.kwargs:
             test_string += f"\tkwargs={self.kwargs},\n"
         if self.setup:
-            test_string += f"\\side_effects={self.side_effects},\n"
+            test_string += f"\tside_effects={self.side_effects},\n"
         if self.returns:
             test_string += f"\treturns={self.formatted_returns()},\n"
         test_string += ")"
-        return test_string
+
+        # Python formatters prefer double quotes, let's try to adhere
+        return test_string.replace("'", '"')
 
 
 @dataclass(slots=True)
