@@ -43,27 +43,30 @@ def mock_function_dependencies(
     return mocks
 
 
-def generate_function_dependency_test_file(
-    fn: Callable, mocks: dict[str, DependentFunctionSpy]
-) -> None:
-    generated_test_file = ""
-    generated_test_file_imports = set()
-    for mock_name, mock_fn in mocks.items():
-        function_under_test = config.test_graph.functions[
-            mock_name
-        ].name.qualified.split(".")
-        generated_test_file_imports.add(
-            (
-                ".".join(function_under_test[:-1]),
-                function_under_test[-1],
-            )
-        )
-        test_strings: set[str] = {test.__str__() for test in mock_fn.calls}
-        for test in test_strings:
-            generated_test_file += test
-            generated_test_file += "\n"
+def generate_naive_function_import(mock_name: str) -> tuple[str, str]:
+    function_under_test = config.test_graph.functions[mock_name].name.qualified.split(
+        "."
+    )
+    return (
+        ".".join(function_under_test[:-1]),
+        function_under_test[-1],
+    )
 
+
+def build_test_strings(fn_tests: list[FunctionTest]):
+    all_function_tests = ""
+    test_strings: set[str] = {test.__str__() for test in fn_tests}
+    for test in test_strings:
+        all_function_tests += test + "\n"
+
+    return all_function_tests
+
+
+def build_import_string(generated_test_file_imports: set[tuple[str, str]]) -> str:
     generated_test_file_import_string = ""
+    import_paren_limit = 2
+
+    # Group naive test imports
     grouped_generated_test_file_imports: dict[str, list[str]] = {
         "sundew.test": ["test"]
     }
@@ -71,7 +74,8 @@ def generate_function_dependency_test_file(
         grouped_generated_test_file_imports.setdefault(generated_from, []).append(
             generated_import
         )
-    import_paren_limit = 2
+
+    # Build import string from groups
     for grouped_from, grouped_import in sorted(
         grouped_generated_test_file_imports.items()
     ):
@@ -84,14 +88,35 @@ def generate_function_dependency_test_file(
             ",\n)" if len(grouped_import) > import_paren_limit else "",
         )
     generated_test_file_import_string += "\n"
+    return generated_test_file_import_string
+
+
+def write_tests_to_file(
+    fn, file_path, generated_test_file_import_string, generated_test_file
+):
+    with (Path(file_path).resolve().parent / f"auto_test_{fn.__name__}.py").open(
+        "w"
+    ) as test_file:
+        test_file.write(
+            generated_test_file_import_string.expandtabs(4)
+            + generated_test_file.expandtabs(4)
+        )
+
+
+def generate_function_dependency_test_file(
+    fn: Callable, mocks: dict[str, DependentFunctionSpy]
+) -> None:
+    generated_test_file = ""
+    generated_test_file_imports = set()
+    for mock_name, mock_fn in mocks.items():
+        generated_test_file_imports.add(generate_naive_function_import(mock_name))
+        generated_test_file += build_test_strings(mock_fn.calls)
+
+    generated_test_file_import_string = build_import_string(generated_test_file_imports)
 
     file_path: str = inspect.getmodule(fn).__file__ or ""  # type: ignore[union-attr]
 
     if generated_test_file:
-        with (Path(file_path).resolve().parent / f"auto_test_{fn.__name__}.py").open(
-            "w"
-        ) as test_file:
-            test_file.write(
-                generated_test_file_import_string.expandtabs(4)
-                + generated_test_file.expandtabs(4)
-            )
+        write_tests_to_file(
+            fn, file_path, generated_test_file_import_string, generated_test_file
+        )
