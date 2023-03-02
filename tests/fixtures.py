@@ -1,13 +1,11 @@
-from contextlib import _GeneratorContextManager, contextmanager
-from typing import TYPE_CHECKING, Any
+from collections.abc import Iterator
+from contextlib import contextmanager
+from typing import Any
 
 from pydantic import BaseModel
 
 from sundew.graph import Graph
 from sundew.types import Function, FunctionTest
-
-if TYPE_CHECKING:
-    from collections.abc import Generator
 
 
 def dependent_func() -> str:
@@ -21,7 +19,7 @@ def callee_func() -> str:
 
 
 @contextmanager
-def setup_empty_graph() -> _GeneratorContextManager[Graph, None, None]:
+def setup_empty_graph() -> Iterator:
     try:
         new_graph = Graph()
         new_graph.add_connection(Function(callee_func), Function(dependent_func))

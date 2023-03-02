@@ -1,7 +1,7 @@
+import inspect
 from collections.abc import Callable
 from contextlib import _GeneratorContextManager
 from dataclasses import dataclass, field
-import inspect
 from typing import Any
 
 
@@ -26,9 +26,10 @@ class FunctionTest:
         simple_name = self.function.__name__
         qualified_name = self.function.__qualname__
         if simple_name == qualified_name:
-            qualified_name = ".".join(
-                [inspect.getmodule(self.function).__name__, simple_name]
-            )
+            module = inspect.getmodule(self.function)
+            qualified_name_array = [module.__name__] if module else []
+            qualified_name_array.append(simple_name)
+            qualified_name = ".".join(qualified_name_array)
 
         return FunctionName(simple=simple_name, qualified=qualified_name)
 
@@ -66,8 +67,9 @@ class Function:
         simple_name = self.declaration.__name__
         qualified_name = self.declaration.__qualname__
         if simple_name == qualified_name:
-            qualified_name = ".".join(
-                [inspect.getmodule(self.declaration).__name__, simple_name]
-            )
+            module = inspect.getmodule(self.declaration)
+            qualified_name_array = [module.__name__] if module else []
+            qualified_name_array.append(simple_name)
+            qualified_name = ".".join(qualified_name_array)
 
         return FunctionName(simple=simple_name, qualified=qualified_name)
