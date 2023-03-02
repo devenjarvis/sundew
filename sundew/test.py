@@ -4,9 +4,10 @@ import importlib
 import inspect
 import os
 import sys
-from contextlib import AbstractContextManager, ExitStack
+from collections.abc import Callable, Coroutine
+from contextlib import AbstractContextManager, ExitStack, _GeneratorContextManager
 from functools import wraps
-from typing import Any, Callable, Coroutine, Generator
+from typing import Any
 from unittest.mock import patch
 
 from pydantic import BaseConfig, BaseModel, create_model
@@ -22,7 +23,11 @@ from rich.progress import (
 
 from sundew.config import config
 from sundew.side_effects import ConvertSideEffect, get_source
-from sundew.types import FunctionName, FunctionTest
+from sundew.test_writer import (
+    generate_function_dependency_test_file,
+    mock_function_dependencies,
+)
+from sundew.types import Function, FunctionTest
 
 
 def update_test_graph(fn: Callable) -> None:
@@ -49,20 +54,14 @@ def update_test_graph(fn: Callable) -> None:
                     # Only connect functions within the module
                     if parent_module in config.modules and inspect.isfunction(function):
                         config.test_graph.add_connection(
-                            FunctionName(
-                                simple=func_name,
-                                qualified=".".join([module_name, func_name]),
-                            ),
-                            FunctionName(
-                                simple=sub_func_name,
-                                qualified=".".join([module_name, sub_func_name]),
-                            ),
+                            Function(declaration=fn),
+                            Function(declaration=function),
                         )
         else:
-            print("Not sure how we get here yet")
+            print("Not sure how we get here yet.")
 
 
-def get_test_function(fn: Callable) -> Callable | Coroutine:
+def get_test_function(fn: Callable) -> Callable:
     @wraps(fn)
     def sundew_test_wrapper(
         *args: tuple[Any, ...],
@@ -78,13 +77,17 @@ def get_test_function(fn: Callable) -> Callable | Coroutine:
         return await fn(*args, **kwargs)
 
     if inspect.iscoroutinefunction(fn):
+        async_sundew_test_wrapper.__signature__ = inspect.signature(  # type: ignore[attr-defined]
+            fn
+        )
         return async_sundew_test_wrapper
+    sundew_test_wrapper.__signature__ = inspect.signature(fn)  # type: ignore[attr-defined]
     return sundew_test_wrapper
 
 
 def test(fn: Callable) -> Callable:
     def add_test(
-        setup: set[Generator[Any, None, None]] | None = None,
+        setup: set[Callable[[], _GeneratorContextManager[Any]]] | None = None,
         kwargs: dict | None = None,
         returns: Any | None = None,
         patches: dict | None = None,
@@ -101,7 +104,7 @@ def test(fn: Callable) -> Callable:
                 returns=returns,
                 setup=setup or set(),
                 side_effects=side_effects or [],
-            )
+            ),
         )
 
         return add_test
@@ -119,7 +122,7 @@ def apply_fixtures(test: FunctionTest, stack: ExitStack) -> dict[str, Any]:
     fixture_yields = {}
     if test.setup:
         for fixture in test.setup:
-            fixture_yield = stack.enter_context(fixture())
+            fixture_yield: Any = stack.enter_context(fixture())
             fixture_yields[fixture.__name__] = fixture_yield
 
     return fixture_yields
@@ -147,7 +150,9 @@ def copy_function_inputs(test: FunctionTest) -> dict[str, Any]:
     return isolated_inputs
 
 
-def run_function(test: FunctionTest, isolated_input: dict[str, Any]) -> dict[str, Any]:
+def run_function(
+    test: FunctionTest, isolated_input: dict[str, Any]
+) -> Any:  # noqa: ANN401
     if inspect.iscoroutinefunction(test.function):
         return asyncio.run(test.function(**isolated_input))
     return test.function(**isolated_input)
@@ -228,8 +233,14 @@ def run_test(
         try:
             # Isolate input arguments
             isolated_input = copy_function_inputs(test)
+
+            mocks = mock_function_dependencies(test.function, stack)
             # Run the test function once for evaluation
             actual_return = run_function(test, isolated_input)
+
+            # Do something with mock data
+            generate_function_dependency_test_file(test.function, mocks)
+
         except Exception as e:  # noqa: BLE001
             # If we get an exception, check if it's expected
             check_test_exception(test, e)
@@ -309,7 +320,6 @@ def run(function_name: str) -> None:
         MofNCompleteColumn(),
         TimeElapsedColumn(),
     ) as progress:
-
         total_num_tests = sum(
             len(func.tests) for func in config.test_graph.functions.values()
         )

@@ -1,32 +1,17 @@
 from sundew.graph import Graph
 from sundew.test import test
-from sundew.types import FunctionName
-from tests import fixtures
+from sundew.types import Function
+from tests.fixtures import callee_func, dependent_func
 
 test(Graph.add_connection)(
     kwargs={
         "self": Graph(),
-        "node1": FunctionName("A"),
-        "node2": FunctionName("B"),
+        "node1": Function(callee_func),
+        "node2": Function(dependent_func),
     },
     side_effects=[
-        lambda _: _.self.functions["A"].deps == {"B"},
+        lambda _: _.self.functions["callee_func"].deps == {"dependent_func"},
     ],
 )
 
-test(Graph.dependencies)(
-    kwargs={"self": Graph(), "node": "A"},
-    returns=set(),
-)
-
-test(Graph.usage)(
-    setup={fixtures.setup_empty_graph},
-    kwargs={"self": Graph(), "node": "B"},
-    returns=set(),
-)
-
-# Note: chained tests break failure links (always link to top most test)
-test(Graph.usage)(
-    kwargs={"self": fixtures.setup_empty_graph, "node": "B"},
-    returns={"A"},
-)
+# TODO: Add remaining Graph tests

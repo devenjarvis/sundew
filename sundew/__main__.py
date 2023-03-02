@@ -2,6 +2,7 @@ import importlib
 import importlib.util
 import os
 import sys
+from pathlib import Path
 
 import typer
 
@@ -13,7 +14,7 @@ app = typer.Typer()
 
 @app.command()
 def run(
-    module: str,
+    module: Path,
     function: str = typer.Option(  # noqa: B008
         "",
         "--function",
@@ -23,13 +24,13 @@ def run(
 ) -> None:
     config.modules = {"module.name"}
 
-    if os.path.isdir(module):
+    if module.is_dir():
         for dirpath, _, fnames in os.walk(module):
             for f in fnames:
                 if f.endswith(".py"):
                     if spec := importlib.util.spec_from_file_location(
                         "module.name",
-                        os.path.join(dirpath, f),
+                        Path(dirpath) / f,
                     ):
                         imported_module = importlib.util.module_from_spec(spec)
                         sys.modules["module.name"] = imported_module
