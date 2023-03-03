@@ -26,6 +26,16 @@ class DependentFunctionSpy:
         self.calls.append(function_test)
         return answer
 
+    def __eq__(self, other) -> bool:  # noqa: ANN001
+        if not isinstance(other, DependentFunctionSpy):
+            # don't attempt to compare against unrelated types
+            return NotImplemented
+
+        return (
+            self.func.__code__.co_code == other.func.__code__.co_code
+            and self.calls == other.calls
+        )
+
 
 def mock_function_dependencies(
     fn: Callable, stack: ExitStack
@@ -53,7 +63,7 @@ def generate_naive_function_import(mock_name: str) -> tuple[str, str]:
     )
 
 
-def build_test_strings(fn_tests: list[FunctionTest]):
+def build_test_strings(fn_tests: list[FunctionTest]) -> str:
     all_function_tests = ""
     test_strings: set[str] = {test.__str__() for test in fn_tests}
     for test in test_strings:
@@ -92,8 +102,11 @@ def build_import_string(generated_test_file_imports: set[tuple[str, str]]) -> st
 
 
 def write_tests_to_file(
-    fn, file_path, generated_test_file_import_string, generated_test_file
-):
+    fn: Callable,
+    file_path: str,
+    generated_test_file_import_string: str,
+    generated_test_file: str,
+) -> None:
     with (Path(file_path).resolve().parent / f"auto_test_{fn.__name__}.py").open(
         "w"
     ) as test_file:

@@ -21,6 +21,12 @@ def run(
         "-f",
         help="Run all tests for this function.",
     ),
+    auto_test_writer: bool = typer.Option(  # noqa: B008, FBT001
+        False,  # noqa: FBT003
+        "--auto-test-writer",
+        "-a",
+        help="Enable the automatic test writer.",
+    ),
 ) -> None:
     config.modules = {"module.name"}
 
@@ -51,7 +57,7 @@ def run(
         else:
             ...
 
-    test.run(function_name=function)
+    test.run(function_name=function, enable_auto_test_writer=auto_test_writer)
 
 
 if __name__ == "__main__":

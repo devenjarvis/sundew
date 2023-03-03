@@ -143,7 +143,7 @@ def copy_function_inputs(test: FunctionTest) -> dict[str, Any]:
                 with input_value() as input_val:
                     result = input_val
             else:
-                result = input_value()
+                result = input_value
         else:
             result = input_value
         isolated_inputs[arg_name] = result
@@ -176,6 +176,7 @@ def check_test_output(test: FunctionTest, actual_return: Any) -> None:  # noqa: 
             + "which does not match the expected AST for "
             + f"{ast.unparse(test.returns).strip()}"
         )
+    #     assert actual_return.__code__.co_code == test.returns.__code__.co_code, (
     else:
         assert actual_return == test.returns, (
             f"Input {test.kwargs} returned {actual_return} "
@@ -224,6 +225,7 @@ def run_test(
     stack: ExitStack,
     tests_ran: TaskID,
     progress: Progress,
+    enable_auto_test_writer: bool,  # noqa: FBT001
 ) -> None:
     try:
         # programmatically apply any patches defined
@@ -234,12 +236,15 @@ def run_test(
             # Isolate input arguments
             isolated_input = copy_function_inputs(test)
 
-            mocks = mock_function_dependencies(test.function, stack)
+            if enable_auto_test_writer:
+                # Mock dependent functions to be able to write regression tests
+                mocks = mock_function_dependencies(test.function, stack)
             # Run the test function once for evaluation
             actual_return = run_function(test, isolated_input)
 
-            # Do something with mock data
-            generate_function_dependency_test_file(test.function, mocks)
+            if enable_auto_test_writer:
+                # Write tests with mock data
+                generate_function_dependency_test_file(test.function, mocks)
 
         except Exception as e:  # noqa: BLE001
             # If we get an exception, check if it's expected
@@ -313,7 +318,7 @@ def detect_missing_tests(selected_functions: list[str]) -> list[str]:
     return missing_tests
 
 
-def run(function_name: str) -> None:
+def run(function_name: str, enable_auto_test_writer: bool) -> None:  # noqa: FBT001
     with Progress(
         TextColumn("{task.description}"),
         BarColumn(),
@@ -342,4 +347,4 @@ def run(function_name: str) -> None:
         # Run all selecte tests
         for test in sorted_tests:
             with ExitStack() as stack:
-                run_test(test, stack, tests_ran, progress)
+                run_test(test, stack, tests_ran, progress, enable_auto_test_writer)
