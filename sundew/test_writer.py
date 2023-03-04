@@ -13,6 +13,8 @@ class DependentFunctionSpy:
     def __init__(self, func: Callable) -> None:
         self.func = func
         self.calls: list[FunctionTest] = []
+        self.__name__ = func.__name__
+        self.__qualname__ = func.__qualname__
 
     def __call__(
         self, *args: tuple[Any, ...], **kwargs: dict[str, Any]
@@ -26,7 +28,7 @@ class DependentFunctionSpy:
         self.calls.append(function_test)
         return answer
 
-    def __eq__(self, other) -> bool:  # noqa: ANN001
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, DependentFunctionSpy):
             # don't attempt to compare against unrelated types
             return NotImplemented
@@ -106,7 +108,7 @@ def write_tests_to_file(
     file_path: str,
     generated_test_file_import_string: str,
     generated_test_file: str,
-) -> None:
+) -> str:
     with (Path(file_path).resolve().parent / f"auto_test_{fn.__name__}.py").open(
         "w"
     ) as test_file:

@@ -33,9 +33,21 @@ class FunctionTest:
 
         return FunctionName(simple=simple_name, qualified=qualified_name)
 
+    def formatted_kwargs(self) -> Any | None:
+        formatted_kwargs = {}
+        for kwarg, kwval in self.kwargs.items():
+            if isinstance(kwval, Callable):
+                formatted_kwargs[kwarg] = kwval.__name__
+            # if isinstance(kwval, object):
+            #     formatted_kwargs[kwarg] =
+            # if inspect.isclass(kwval):
+
+            formatted_kwargs[kwarg] = kwval
+        return formatted_kwargs
+
     def formatted_returns(self) -> Any | None:
         if isinstance(self.returns, str):
-            return f"'{self.returns}'"
+            return ("%r" % self.returns).replace('"', r"\"")
         return self.returns
 
     def __str__(self) -> str:
@@ -46,7 +58,7 @@ class FunctionTest:
         if self.setup:
             test_string += f"\tsetup={self.setup},\n"
         if self.kwargs:
-            test_string += f"\tkwargs={self.kwargs},\n"
+            test_string += f"\tkwargs={self.formatted_kwargs()},\n"
         if self.setup:
             test_string += f"\tside_effects={self.side_effects},\n"
         if self.returns:

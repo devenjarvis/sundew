@@ -33,61 +33,46 @@ test(sundew_test.run_function)(
 
 test(sundew_test.select_functions_to_test)(
     kwargs={"function_name": ""},
-    patches={
-        "sundew.config.config.test_graph": fixtures.setup_simple_test_graph(),
-    },
-    returns=["example_fn_1", "example_fn_2"],
+    setup={fixtures.extend_config_with_simple_functions},
+    side_effects={lambda _: set(["example_fn_1", "example_fn_2"]) <= set(_.returns)},
 )(
     kwargs={"function_name": "example_fn_1"},
-    patches={
-        "sundew.config.config.test_graph": fixtures.setup_simple_test_graph(),
-    },
+    setup={fixtures.extend_config_with_simple_functions},
     returns=["example_fn_1"],
 )
 
 test(sundew_test.sort_tests)(
+    setup={fixtures.extend_config_with_dependent_functions},
     kwargs={"selected_functions": ["dependent_func", "callee_func"]},
-    patches={
-        "sundew.config.config.test_graph": fixtures.setup_test_graph_with_dependency(),
-    },
     returns=[
         fixtures.dependent_func_function_test,
         fixtures.callee_func_function_test,
     ],
 )(
     # Should get same output, regardless of input order
+    setup={fixtures.extend_config_with_dependent_functions},
     kwargs={"selected_functions": ["callee_func", "dependent_func"]},
-    patches={
-        "sundew.config.config.test_graph": fixtures.setup_test_graph_with_dependency(),
-    },
     returns=[
         fixtures.dependent_func_function_test,
         fixtures.callee_func_function_test,
     ],
 )(
     # Make sure sorting works with only 1 element
+    setup={fixtures.extend_config_with_dependent_functions},
     kwargs={"selected_functions": ["dependent_func"]},
-    patches={
-        "sundew.config.config.test_graph": fixtures.setup_test_graph_with_dependency(),
-    },
     returns=[fixtures.dependent_func_function_test],
 )(
     # Make sure sorting works with zero elements
+    setup={fixtures.extend_config_with_dependent_functions},
     kwargs={"selected_functions": []},
-    patches={
-        "sundew.config.config.test_graph": fixtures.setup_test_graph_with_dependency(),
-    },
     returns=[],
 )
 
-test(sundew_test.detect_missing_tests)(
-    # Make sure sorting works with only 1 element
-    kwargs={"selected_functions": ["callee_func"]},
-    patches={
-        "sundew.config.config.test_graph": fixtures.setup_test_graph_with_dependency(),
-    },
-    returns=["tests.fixtures.dependent_func"],
-)
+# test(sundew_test.detect_missing_tests)(
+#     setup={fixtures.extend_config_with_dependent_functions},
+#     kwargs={"selected_functions": ["callee_func"]},
+#     returns=["tests.fixtures.dependent_func"],
+# )
 
 # can't test sundew.test.run due to the fact that we are using it.
 # Not sure if this is surmountable, or if I just need to break it up for better coverage

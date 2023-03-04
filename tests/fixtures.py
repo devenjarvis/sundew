@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 from sundew.graph import Graph
 from sundew.types import Function, FunctionTest
+from sundew.config import config
 
 
 def dependent_func() -> str:
@@ -107,3 +108,29 @@ def setup_test_graph_with_dependency() -> Graph:
     new_graph.add_test(dependent_func_function_test)
     new_graph.add_test(callee_func_function_test)
     return new_graph
+
+
+@contextmanager
+def extend_config_with_dependent_functions() -> Iterator:
+    try:
+        new_graph = setup_test_graph_with_dependency()
+        config.test_graph.extend(new_graph)
+
+        yield new_graph
+    finally:
+        # remove the part of the graph we added
+        for key in new_graph.functions.keys():
+            del config.test_graph.functions[key]
+
+
+@contextmanager
+def extend_config_with_simple_functions() -> Iterator:
+    try:
+        new_graph = setup_simple_test_graph()
+        config.test_graph.extend(new_graph)
+
+        yield new_graph
+    finally:
+        # remove the part of the graph we added
+        for key in new_graph.functions.keys():
+            del config.test_graph.functions[key]

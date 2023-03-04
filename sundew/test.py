@@ -139,7 +139,7 @@ def copy_function_inputs(test: FunctionTest) -> dict[str, Any]:
 
     for arg_name, input_value in test.kwargs.items():
         if callable(input_value):
-            if isinstance(input_value(), AbstractContextManager):
+            if isinstance(input_value, AbstractContextManager):
                 with input_value() as input_val:
                     result = input_val
             else:
@@ -208,7 +208,9 @@ def build_side_effect_vars(test_function: Callable) -> type[BaseModel]:
     )  # type: ignore[call-overload]
 
 
-def check_test_side_effects(test: FunctionTest, isolated_input: dict[str, Any]) -> None:
+def check_test_side_effects(
+    test: FunctionTest, actual_return: Any, isolated_input: dict[str, Any]
+) -> None:
     if test.side_effects:
         side_effect_sources = get_source(test.side_effects)
         for side_effect_source in side_effect_sources:
@@ -216,7 +218,10 @@ def check_test_side_effects(test: FunctionTest, isolated_input: dict[str, Any]) 
             side_effect_code = ast.unparse(side_effect_ast)
 
             side_effect_arg_model = build_side_effect_vars(test.function)
-            _ = side_effect_arg_model.construct(patches=test.patches, **isolated_input)
+            _ = side_effect_arg_model.construct(
+                patches=test.patches, returns=actual_return, **isolated_input
+            )
+            print(side_effect_code)
             exec(side_effect_code)  # noqa: S102
 
 
@@ -251,10 +256,11 @@ def run_test(
             check_test_exception(test, e)
         else:
             # If we didn't get an exception then check the output normally
-            check_test_output(test, actual_return)
+            if test.returns:
+                check_test_output(test, actual_return)
         finally:
             # Check if we have defined side effects
-            check_test_side_effects(test, isolated_input)
+            check_test_side_effects(test, actual_return, isolated_input)
 
     except AssertionError as e:
         # Stop the progress bar

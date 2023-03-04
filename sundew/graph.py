@@ -5,6 +5,10 @@ class Graph:
     def __init__(self) -> None:
         self.functions: dict[str, Function] = {}
 
+    def extend(self, other_graph: object) -> None:
+        if isinstance(other_graph, Graph):
+            self.functions.update(other_graph.functions)
+
     def add_test(self, test: FunctionTest) -> None:
         if test.name.simple not in self.functions:
             self.functions[test.name.simple] = Function(declaration=test.function)
