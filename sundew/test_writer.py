@@ -68,7 +68,7 @@ def generate_naive_function_import(mock_name: str) -> tuple[str, str]:
 def build_test_strings(fn_tests: list[FunctionTest]) -> str:
     all_function_tests = ""
     test_strings: set[str] = {test.__str__() for test in fn_tests}
-    for test in test_strings:
+    for test in sorted(test_strings):
         all_function_tests += test + "\n"
 
     return all_function_tests
@@ -104,14 +104,11 @@ def build_import_string(generated_test_file_imports: set[tuple[str, str]]) -> st
 
 
 def write_tests_to_file(
-    fn: Callable,
-    file_path: str,
+    file_path: Path,
     generated_test_file_import_string: str,
     generated_test_file: str,
-) -> str:
-    with (Path(file_path).resolve().parent / f"auto_test_{fn.__name__}.py").open(
-        "w"
-    ) as test_file:
+) -> None:
+    with (file_path).open("w") as test_file:
         test_file.write(
             generated_test_file_import_string.expandtabs(4)
             + generated_test_file.expandtabs(4)
@@ -121,17 +118,28 @@ def write_tests_to_file(
 def generate_function_dependency_test_file(
     fn: Callable, mocks: dict[str, DependentFunctionSpy]
 ) -> None:
-    generated_test_file = ""
     generated_test_file_imports = set()
+    mock_calls: list[FunctionTest] = []
+    # Build imports
     for mock_name, mock_fn in mocks.items():
         generated_test_file_imports.add(generate_naive_function_import(mock_name))
-        generated_test_file += build_test_strings(mock_fn.calls)
+        mock_calls.extend(mock_fn.calls)
 
     generated_test_file_import_string = build_import_string(generated_test_file_imports)
 
-    file_path: str = inspect.getmodule(fn).__file__ or ""  # type: ignore[union-attr]
+    # Build test file all at once
+    generated_test_file = build_test_strings(mock_calls)
+
+    # Build file path
+    if module_path := inspect.getmodule(fn).__file__:  # type: ignore[union-attr]
+        file_path = Path(module_path).resolve().parent
+    else:
+        file_path = Path(".").resolve()
+    for _ in fn.__qualname__.split(".")[:-1]:
+        file_path = file_path.parent
+    file_path = file_path / "tests" / f"auto_test_{fn.__name__}.py"
 
     if generated_test_file:
         write_tests_to_file(
-            fn, file_path, generated_test_file_import_string, generated_test_file
+            file_path, generated_test_file_import_string, generated_test_file
         )

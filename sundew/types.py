@@ -36,18 +36,12 @@ class FunctionTest:
     def formatted_kwargs(self) -> Any | None:
         formatted_kwargs = {}
         for kwarg, kwval in self.kwargs.items():
-            if isinstance(kwval, Callable):
-                formatted_kwargs[kwarg] = kwval.__name__
-            # if isinstance(kwval, object):
-            #     formatted_kwargs[kwarg] =
-            # if inspect.isclass(kwval):
-
             formatted_kwargs[kwarg] = kwval
         return formatted_kwargs
 
     def formatted_returns(self) -> Any | None:
         if isinstance(self.returns, str):
-            return ("%r" % self.returns).replace('"', r"\"")
+            return repr(self.returns).replace('"', r"\"")
         return self.returns
 
     def __str__(self) -> str:
@@ -67,6 +61,18 @@ class FunctionTest:
 
         # Python formatters prefer double quotes, let's try to adhere
         return test_string.replace("'", '"')
+
+    def __repr__(self) -> str:
+        return "FunctionTest(function={}, location={}, kwargs={}, ".format(
+            self.function.__name__,
+            repr(self.location),
+            self.kwargs,
+        ) + "patches={}, returns={}, setup={}, side_effects={})".format(
+            self.patches,
+            repr(self.returns),
+            self.setup,
+            self.side_effects,
+        )
 
 
 @dataclass(slots=True)

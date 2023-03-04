@@ -18,7 +18,6 @@ test(test_writer.generate_naive_function_import)(
 )
 
 test(test_writer.generate_function_dependency_test_file)(
-    # setup={fixtures.extend_config_with_dependent_functions},
     kwargs={
         "fn": test_writer.generate_function_dependency_test_file,
         "mocks": {

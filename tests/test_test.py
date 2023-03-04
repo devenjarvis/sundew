@@ -34,7 +34,7 @@ test(sundew_test.run_function)(
 test(sundew_test.select_functions_to_test)(
     kwargs={"function_name": ""},
     setup={fixtures.extend_config_with_simple_functions},
-    side_effects={lambda _: set(["example_fn_1", "example_fn_2"]) <= set(_.returns)},
+    side_effects={lambda _: {"example_fn_1", "example_fn_2"} <= set(_.returns)},
 )(
     kwargs={"function_name": "example_fn_1"},
     setup={fixtures.extend_config_with_simple_functions},
@@ -69,10 +69,6 @@ test(sundew_test.sort_tests)(
 )
 
 # test(sundew_test.detect_missing_tests)(
-#     setup={fixtures.extend_config_with_dependent_functions},
-#     kwargs={"selected_functions": ["callee_func"]},
-#     returns=["tests.fixtures.dependent_func"],
-# )
 
 # can't test sundew.test.run due to the fact that we are using it.
 # Not sure if this is surmountable, or if I just need to break it up for better coverage

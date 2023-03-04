@@ -1,12 +1,12 @@
 from collections.abc import Iterator
-from contextlib import contextmanager
+from contextlib import contextmanager, ExitStack
 from typing import Any
 
 from pydantic import BaseModel
 
+from sundew.config import config
 from sundew.graph import Graph
 from sundew.types import Function, FunctionTest
-from sundew.config import config
 
 
 def dependent_func() -> str:
@@ -119,7 +119,7 @@ def extend_config_with_dependent_functions() -> Iterator:
         yield new_graph
     finally:
         # remove the part of the graph we added
-        for key in new_graph.functions.keys():
+        for key in new_graph.functions:
             del config.test_graph.functions[key]
 
 
@@ -132,5 +132,5 @@ def extend_config_with_simple_functions() -> Iterator:
         yield new_graph
     finally:
         # remove the part of the graph we added
-        for key in new_graph.functions.keys():
+        for key in new_graph.functions:
             del config.test_graph.functions[key]

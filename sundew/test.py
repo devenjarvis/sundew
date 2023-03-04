@@ -139,7 +139,7 @@ def copy_function_inputs(test: FunctionTest) -> dict[str, Any]:
 
     for arg_name, input_value in test.kwargs.items():
         if callable(input_value):
-            if isinstance(input_value, AbstractContextManager):
+            if isinstance(input_value, Callable[..., AbstractContextManager[Any]]):  # type: ignore[arg-type] # noqa: E501
                 with input_value() as input_val:
                     result = input_val
             else:
@@ -209,7 +209,9 @@ def build_side_effect_vars(test_function: Callable) -> type[BaseModel]:
 
 
 def check_test_side_effects(
-    test: FunctionTest, actual_return: Any, isolated_input: dict[str, Any]
+    test: FunctionTest,
+    actual_return: Any,  # noqa: ANN401
+    isolated_input: dict[str, Any],
 ) -> None:
     if test.side_effects:
         side_effect_sources = get_source(test.side_effects)
@@ -221,7 +223,6 @@ def check_test_side_effects(
             _ = side_effect_arg_model.construct(
                 patches=test.patches, returns=actual_return, **isolated_input
             )
-            print(side_effect_code)
             exec(side_effect_code)  # noqa: S102
 
 
