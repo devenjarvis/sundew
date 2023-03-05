@@ -45,6 +45,12 @@ def mock_function_dependencies(
     mocks: dict[str, DependentFunctionSpy] = {}
     for dep_func_simple_name in config.test_graph.functions[fn.__name__].deps:
         dep_func = config.test_graph.functions[dep_func_simple_name]
+        # Recursively mock sub-dependent functions
+        if (
+            config.test_graph.functions[dep_func_simple_name].deps
+            and dep_func_simple_name != "mock_function_dependencies"
+        ):
+            mocks.update(mock_function_dependencies(dep_func.declaration, stack))
         # Spy on all dependent functions
         mocks[dep_func_simple_name] = stack.enter_context(
             patch(
@@ -132,14 +138,19 @@ def generate_function_dependency_test_file(
 
     # Build file path
     if module_path := inspect.getmodule(fn).__file__:  # type: ignore[union-attr]
-        file_path = Path(module_path).resolve().parent
+        file_path = Path(module_path).resolve()
     else:
         file_path = Path(".").resolve()
-    for _ in fn.__qualname__.split(".")[:-1]:
+    # print(config.test_graph.functions[fn.__name__].name.qualified)
+    for _ in config.test_graph.functions[fn.__name__].name.qualified.split(".")[:-1]:
         file_path = file_path.parent
-    file_path = file_path / "tests" / f"auto_test_{fn.__name__}.py"
+    file_path = file_path / "tests"
+    for dir in config.test_graph.functions[fn.__name__].name.qualified.split(".")[1:-1]:
+        file_path /= dir
+    file_path /= f"auto_test_{fn.__name__}.py"
 
     if generated_test_file:
+        file_path.parents[0].mkdir(parents=True, exist_ok=True)
         write_tests_to_file(
             file_path, generated_test_file_import_string, generated_test_file
         )

@@ -45,17 +45,19 @@ def update_test_graph(fn: Callable) -> None:
                 # We only care about functions in the modules being tested
                 if hasattr(imported_module, sub_func_name):
                     # Verify that the funcion is native to the modules being tested
-                    function = getattr(imported_module, sub_func_name)
+                    sub_function = getattr(imported_module, sub_func_name)
                     parent_module = getattr(
-                        function,
+                        sub_function,
                         "__module__",
                         None,
                     )
                     # Only connect functions within the module
-                    if parent_module in config.modules and inspect.isfunction(function):
+                    if parent_module in config.modules and inspect.isfunction(
+                        sub_function
+                    ):
                         config.test_graph.add_connection(
                             Function(declaration=fn),
-                            Function(declaration=function),
+                            Function(declaration=sub_function),
                         )
         else:
             print("Not sure how we get here yet.")

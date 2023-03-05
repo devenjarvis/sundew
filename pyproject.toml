@@ -29,9 +29,12 @@ format = "black ."
 format_check = "black . --check"
 lint = "ruff ."
 sundew = "python -m sundew"
-test_examples = "python -m sundew ./examples"
 test_sundew = "python -m sundew ./tests"
 type = "mypy ."
+
+[tool.poe.tasks.test_examples]
+cmd = "python -m sundew ."
+cwd = "./examples"
 
 
 [tool.ruff]
