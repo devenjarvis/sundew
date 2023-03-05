@@ -1,6 +1,6 @@
 import io
 
-from examples import side_effects_example
+from examples.examples import side_effects_example
 from sundew.test import test
 
 test(side_effects_example.concatenate)(

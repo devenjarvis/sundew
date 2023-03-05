@@ -141,16 +141,21 @@ def generate_function_dependency_test_file(
         file_path = Path(module_path).resolve()
     else:
         file_path = Path(".").resolve()
-    # print(config.test_graph.functions[fn.__name__].name.qualified)
     for _ in config.test_graph.functions[fn.__name__].name.qualified.split(".")[:-1]:
         file_path = file_path.parent
     file_path = file_path / "tests"
-    for dir in config.test_graph.functions[fn.__name__].name.qualified.split(".")[1:-1]:
-        file_path /= dir
+    for directory in config.test_graph.functions[fn.__name__].name.qualified.split(".")[
+        1:-1
+    ]:
+        # Create directory
+        file_path /= directory
+
     file_path /= f"auto_test_{fn.__name__}.py"
 
     if generated_test_file:
         file_path.parents[0].mkdir(parents=True, exist_ok=True)
+        # Add __init__.py if it doesn't exist
+        (file_path.parents[0] / "__init__.py").touch()
         write_tests_to_file(
             file_path, generated_test_file_import_string, generated_test_file
         )

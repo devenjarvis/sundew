@@ -1,4 +1,4 @@
-from examples import simple_example
+from examples.examples import simple_example
 from sundew.test import test
 
 test(simple_example.quadratic)(

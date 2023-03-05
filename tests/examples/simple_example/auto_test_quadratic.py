@@ -1,4 +1,4 @@
-from examples.simple_example import (
+from examples.examples.simple_example import (
     divide,
     negative,
     product,

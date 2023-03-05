@@ -1,4 +1,4 @@
-from examples.simple_example import product
+from examples.examples.simple_example import product
 from sundew.test import test
 
 test(product)(
