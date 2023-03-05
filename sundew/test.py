@@ -139,7 +139,7 @@ def copy_function_inputs(test: FunctionTest) -> dict[str, Any]:
 
     for arg_name, input_value in test.kwargs.items():
         if callable(input_value):
-            if isinstance(input_value, Callable[..., AbstractContextManager[Any]]):  # type: ignore[arg-type] # noqa: E501
+            if isinstance(input_value.__annotations__["return"], AbstractContextManager):  # type: ignore[arg-type] # noqa: E501
                 with input_value() as input_val:
                     result = input_val
             else:
