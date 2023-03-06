@@ -2,6 +2,7 @@ import inspect
 from collections.abc import Callable
 from contextlib import _GeneratorContextManager
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 
@@ -36,12 +37,17 @@ class FunctionTest:
     def formatted_kwargs(self) -> Any | None:
         formatted_kwargs = {}
         for kwarg, kwval in self.kwargs.items():
-            formatted_kwargs[kwarg] = kwval
+            if inspect.ismethod(kwval):
+                formatted_kwargs[kwarg] = kwval.__name__
+            else:
+                formatted_kwargs[kwarg] = kwval
         return formatted_kwargs
 
     def formatted_returns(self) -> Any | None:
         if isinstance(self.returns, str):
             return repr(self.returns).replace('"', r"\"")
+        if isinstance(self.returns, Path):
+            return repr(self.returns)
         return self.returns
 
     def __str__(self) -> str:
@@ -63,9 +69,8 @@ class FunctionTest:
         return test_string.replace("'", '"')
 
     def __repr__(self) -> str:
-        return "FunctionTest(function={}, location={}, kwargs={}, ".format(
+        return "FunctionTest(function={}, kwargs={}, ".format(
             self.function.__name__,
-            repr(self.location),
             self.kwargs,
         ) + "patches={}, returns={}, setup={}, side_effects={})".format(
             self.patches,
@@ -74,11 +79,24 @@ class FunctionTest:
             self.side_effects,
         )
 
+    def __hash__(self) -> int:
+        return hash(repr(self))
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, FunctionTest):
+            return NotImplemented
+        return repr(self) == repr(other)
+
+    def __lt__(self, other: object) -> bool:
+        if not isinstance(other, FunctionTest):
+            return NotImplemented
+        return self.function.__name__ < other.function.__name__
+
 
 @dataclass(slots=True)
 class Function:
     declaration: Callable
-    tests: list[FunctionTest] = field(default_factory=list)
+    tests: set[FunctionTest] = field(default_factory=set)
     usage: set[str] = field(default_factory=set)
     deps: set[str] = field(default_factory=set)
 

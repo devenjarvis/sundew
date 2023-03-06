@@ -12,7 +12,7 @@ class Graph:
     def add_test(self, test: FunctionTest) -> None:
         if test.name.simple not in self.functions:
             self.functions[test.name.simple] = Function(declaration=test.function)
-        self.functions[test.name.simple].tests.append(test)
+        self.functions[test.name.simple].tests.add(test)
 
     def add_connection(self, node1: Function, node2: Function) -> None:
         # Assume connection is directional from A -> B

@@ -141,7 +141,7 @@ def copy_function_inputs(test: FunctionTest) -> dict[str, Any]:
 
     for arg_name, input_value in test.kwargs.items():
         if callable(input_value):
-            if isinstance(input_value.__annotations__["return"], AbstractContextManager):  # type: ignore[arg-type] # noqa: E501
+            if inspect.isgeneratorfunction(input_value):  # type: ignore[arg-type]
                 with input_value() as input_val:
                     result = input_val
             else:
@@ -296,18 +296,18 @@ def select_functions_to_test(function_name: str) -> list[str]:
     return selected_functions
 
 
-def sort_tests(selected_functions: list[str]) -> list[FunctionTest]:
+def sort_tests(selected_functions: list[str]) -> set[FunctionTest]:
     # Kahn's algo to topologically sort test_graph
     all_nodes_added = False
     num_visited_nodes = 0
-    sorted_tests: list[FunctionTest] = []
+    sorted_tests: set[FunctionTest] = set()
     functions_sorted = []
 
     while not all_nodes_added:
         for func_name in selected_functions:
             func = config.test_graph.functions[func_name]
             if len(func.deps) - num_visited_nodes == 0:
-                sorted_tests.extend(func.tests)
+                sorted_tests.update(func.tests)
                 functions_sorted.append(func_name)
         if len(functions_sorted) == len(selected_functions):
             all_nodes_added = True

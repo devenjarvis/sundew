@@ -24,12 +24,12 @@ test(product)(
     returns=64,
 )
 test(product)(
-    kwargs={"a": 1, "b": 5},
-    returns=5,
-)
-test(product)(
     kwargs={"a": 2, "b": 1},
     returns=2,
+)
+test(product)(
+    kwargs={"a": 1, "b": 5},
+    returns=5,
 )
 test(product)(
     kwargs={"a": 4, "b": 5},

@@ -12,7 +12,7 @@ from sundew.types import FunctionTest
 class DependentFunctionSpy:
     def __init__(self, func: Callable) -> None:
         self.func = func
-        self.calls: list[FunctionTest] = []
+        self.calls: set[FunctionTest] = set()
         self.__name__ = func.__name__
         self.__qualname__ = func.__qualname__
 
@@ -25,7 +25,7 @@ class DependentFunctionSpy:
             kwargs=inspect.getcallargs(self.func, *args, **kwargs),
             returns=answer,
         )
-        self.calls.append(function_test)
+        self.calls.add(function_test)
         return answer
 
     def __eq__(self, other: object) -> bool:
@@ -71,11 +71,11 @@ def generate_naive_function_import(mock_name: str) -> tuple[str, str]:
     )
 
 
-def build_test_strings(fn_tests: list[FunctionTest]) -> str:
+def build_test_strings(fn_tests: set[FunctionTest]) -> str:
     all_function_tests = ""
-    test_strings: set[str] = {test.__str__() for test in fn_tests}
-    for test in sorted(test_strings):
-        all_function_tests += test + "\n"
+    # Sort tests alphabeticaly by function name
+    for test in sorted(fn_tests):
+        all_function_tests += test.__str__() + "\n"
 
     return all_function_tests
 
@@ -121,26 +121,12 @@ def write_tests_to_file(
         )
 
 
-def generate_function_dependency_test_file(
-    fn: Callable, mocks: dict[str, DependentFunctionSpy]
-) -> None:
-    generated_test_file_imports = set()
-    mock_calls: list[FunctionTest] = []
-    # Build imports
-    for mock_name, mock_fn in mocks.items():
-        generated_test_file_imports.add(generate_naive_function_import(mock_name))
-        mock_calls.extend(mock_fn.calls)
-
-    generated_test_file_import_string = build_import_string(generated_test_file_imports)
-
-    # Build test file all at once
-    generated_test_file = build_test_strings(mock_calls)
-
-    # Build file path
+def build_file_path(fn: Callable) -> Path:
     if module_path := inspect.getmodule(fn).__file__:  # type: ignore[union-attr]
         file_path = Path(module_path).resolve()
     else:
         file_path = Path(".").resolve()
+
     for _ in config.test_graph.functions[fn.__name__].name.qualified.split(".")[:-1]:
         file_path = file_path.parent
     file_path = file_path / "tests"
@@ -151,6 +137,28 @@ def generate_function_dependency_test_file(
         file_path /= directory
 
     file_path /= f"auto_test_{fn.__name__}.py"
+
+    return file_path
+
+
+def generate_function_dependency_test_file(
+    fn: Callable, mocks: dict[str, DependentFunctionSpy]
+) -> None:
+    generated_test_file_imports = set()
+    mock_calls: set[FunctionTest] = set()
+    # Build imports
+    for mock_name, mock_fn in mocks.items():
+        generated_test_file_imports.add(generate_naive_function_import(mock_name))
+        # Only add tests we don't have written already
+        mock_calls.update(mock_fn.calls - config.test_graph.functions[mock_name].tests)
+
+    generated_test_file_import_string = build_import_string(generated_test_file_imports)
+
+    # Build file path
+    file_path = build_file_path(fn)
+
+    # Build test file all at once
+    generated_test_file = build_test_strings(mock_calls)
 
     if generated_test_file:
         file_path.parents[0].mkdir(parents=True, exist_ok=True)
