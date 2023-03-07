@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
+import black
+
 from sundew.config import config
 from sundew.types import FunctionTest
 
@@ -119,6 +121,13 @@ def write_tests_to_file(
             generated_test_file_import_string.expandtabs(4)
             + generated_test_file.expandtabs(4)
         )
+    # Auto format file
+    black.format_file_in_place(
+        file_path,
+        fast=True,
+        mode=black.FileMode(),
+        write_back=black.WriteBack.YES,
+    )
 
 
 def build_file_path(fn: Callable) -> Path:

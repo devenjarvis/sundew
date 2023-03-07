@@ -35,13 +35,13 @@ class FunctionTest:
         return FunctionName(simple=simple_name, qualified=qualified_name)
 
     def formatted_kwargs(self) -> Any | None:
-        formatted_kwargs = {}
+        formatted_kwargs = []
         for kwarg, kwval in self.kwargs.items():
-            if inspect.ismethod(kwval):
-                formatted_kwargs[kwarg] = kwval.__name__
+            if inspect.isfunction(kwval):
+                formatted_kwargs.append(f"{repr(kwarg)}: {kwval.__name__}")
             else:
-                formatted_kwargs[kwarg] = kwval
-        return formatted_kwargs
+                formatted_kwargs.append(f"{repr(kwarg)}: {repr(kwval)}")
+        return f"{{{', '.join(formatted_kwargs)}}}"
 
     def formatted_returns(self) -> Any | None:
         if isinstance(self.returns, str):

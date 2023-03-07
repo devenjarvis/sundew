@@ -10,12 +10,11 @@ license = "MIT"
 python = "^3.11"
 pydantic = "^1.10.2"
 typer = {version = "^0.7.0", extras = ["all"]}
-decorator = "^5.1.1"
+black = "*"
 
 
 [tool.poetry.group.dev.dependencies]
 mypy = "*"
-black = "*"
 ruff = "*"
 poethepoet = "*"
 

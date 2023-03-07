@@ -5,7 +5,7 @@ import inspect
 import os
 import sys
 from collections.abc import Callable, Coroutine
-from contextlib import AbstractContextManager, ExitStack, _GeneratorContextManager
+from contextlib import ExitStack, _GeneratorContextManager
 from functools import wraps
 from typing import Any
 from unittest.mock import patch
