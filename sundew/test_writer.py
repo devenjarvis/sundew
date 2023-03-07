@@ -63,14 +63,49 @@ def mock_function_dependencies(
     return mocks
 
 
-def generate_naive_function_import(mock_name: str) -> tuple[str, str]:
-    function_under_test = config.test_graph.functions[mock_name].name.qualified.split(
-        "."
-    )
-    return (
-        ".".join(function_under_test[:-1]),
-        function_under_test[-1],
-    )
+def generate_naive_function_import(
+    mock_name: str, mock_test_functions: set[FunctionTest]
+) -> list[tuple[str, str]]:
+    imports = []
+    # Get main function import
+    imports.append(config.test_graph.functions[mock_name].name.qualified.split("."))
+    # Check for any additional functions in kwargs
+    for test_fn in mock_test_functions:
+        for kwval in test_fn.kwargs.values():
+            if inspect.isfunction(kwval) or inspect.isclass(kwval):
+                module = inspect.getmodule(kwval)
+                qualified_name_array = [module.__name__] if module else []
+                qualified_name_array.append(kwval.__name__)
+                imports.append(qualified_name_array)
+            elif isinstance(kwval, (list, tuple, set)):
+                for el in kwval:
+                    if inspect.isfunction(el):
+                        module = inspect.getmodule(el)
+                        qualified_name_array = [module.__name__] if module else []
+                        qualified_name_array.append(el.__name__)
+                        imports.append(qualified_name_array)
+                    elif hasattr(el, "__slots__"):
+                        module = inspect.getmodule(type(el))
+                        qualified_name_array = [module.__name__] if module else []
+                        qualified_name_array.append(type(el).__name__)
+                        imports.append(qualified_name_array)
+
+    # Check for any additional functions in return
+    for test_fn in mock_test_functions:
+        if inspect.isfunction(test_fn.returns):
+            module = inspect.getmodule(kwval)
+            qualified_name_array = [module.__name__] if module else []
+            qualified_name_array.append(kwval.__name__)
+            imports.append(qualified_name_array)
+        elif isinstance(test_fn.returns, Path):
+            imports.append(["pathlib", "PosixPath"])
+    return [
+        (
+            ".".join(function_under_test[:-1]),
+            function_under_test[-1],
+        )
+        for function_under_test in imports
+    ]
 
 
 def build_test_strings(fn_tests: set[FunctionTest]) -> str:
@@ -157,9 +192,16 @@ def generate_function_dependency_test_file(
     mock_calls: set[FunctionTest] = set()
     # Build imports
     for mock_name, mock_fn in mocks.items():
-        generated_test_file_imports.add(generate_naive_function_import(mock_name))
-        # Only add tests we don't have written already
-        mock_calls.update(mock_fn.calls - config.test_graph.functions[mock_name].tests)
+        # Only add imports if we generated tests for the mocked function
+        if mock_fn.calls:
+            for generated_import in generate_naive_function_import(
+                mock_name, mock_fn.calls
+            ):
+                generated_test_file_imports.add(generated_import)
+            # Only add tests we don't have written already
+            mock_calls.update(
+                mock_fn.calls - config.test_graph.functions[mock_name].tests
+            )
 
     generated_test_file_import_string = build_import_string(generated_test_file_imports)
 
