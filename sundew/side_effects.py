@@ -1,6 +1,7 @@
 import ast
 import inspect
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 
 # Generate assert statement from a Compare node

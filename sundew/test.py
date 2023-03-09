@@ -4,9 +4,10 @@ import importlib
 import inspect
 import os
 import sys
-from contextlib import AbstractContextManager, ExitStack
+from collections.abc import Callable, Coroutine
+from contextlib import ExitStack, _GeneratorContextManager
 from functools import wraps
-from typing import Any, Callable, Coroutine, Generator
+from typing import Any
 from unittest.mock import patch
 
 from pydantic import BaseConfig, BaseModel, create_model
@@ -22,7 +23,11 @@ from rich.progress import (
 
 from sundew.config import config
 from sundew.side_effects import ConvertSideEffect, get_source
-from sundew.types import FunctionName, FunctionTest
+from sundew.test_writer import (
+    generate_function_dependency_test_file,
+    mock_function_dependencies,
+)
+from sundew.types import Function, FunctionTest
 
 
 def update_test_graph(fn: Callable) -> None:
@@ -40,29 +45,25 @@ def update_test_graph(fn: Callable) -> None:
                 # We only care about functions in the modules being tested
                 if hasattr(imported_module, sub_func_name):
                     # Verify that the funcion is native to the modules being tested
-                    function = getattr(imported_module, sub_func_name)
+                    sub_function = getattr(imported_module, sub_func_name)
                     parent_module = getattr(
-                        function,
+                        sub_function,
                         "__module__",
                         None,
                     )
                     # Only connect functions within the module
-                    if parent_module in config.modules and inspect.isfunction(function):
+                    if parent_module in config.modules and inspect.isfunction(
+                        sub_function
+                    ):
                         config.test_graph.add_connection(
-                            FunctionName(
-                                simple=func_name,
-                                qualified=".".join([module_name, func_name]),
-                            ),
-                            FunctionName(
-                                simple=sub_func_name,
-                                qualified=".".join([module_name, sub_func_name]),
-                            ),
+                            Function(declaration=fn),
+                            Function(declaration=sub_function),
                         )
         else:
-            print("Not sure how we get here yet")
+            print("Not sure how we get here yet.")
 
 
-def get_test_function(fn: Callable) -> Callable | Coroutine:
+def get_test_function(fn: Callable) -> Callable:
     @wraps(fn)
     def sundew_test_wrapper(
         *args: tuple[Any, ...],
@@ -78,13 +79,17 @@ def get_test_function(fn: Callable) -> Callable | Coroutine:
         return await fn(*args, **kwargs)
 
     if inspect.iscoroutinefunction(fn):
+        async_sundew_test_wrapper.__signature__ = inspect.signature(  # type: ignore[attr-defined]
+            fn
+        )
         return async_sundew_test_wrapper
+    sundew_test_wrapper.__signature__ = inspect.signature(fn)  # type: ignore[attr-defined]
     return sundew_test_wrapper
 
 
 def test(fn: Callable) -> Callable:
     def add_test(
-        setup: set[Generator[Any, None, None]] | None = None,
+        setup: set[Callable[[], _GeneratorContextManager[Any]]] | None = None,
         kwargs: dict | None = None,
         returns: Any | None = None,
         patches: dict | None = None,
@@ -101,7 +106,7 @@ def test(fn: Callable) -> Callable:
                 returns=returns,
                 setup=setup or set(),
                 side_effects=side_effects or [],
-            )
+            ),
         )
 
         return add_test
@@ -119,7 +124,7 @@ def apply_fixtures(test: FunctionTest, stack: ExitStack) -> dict[str, Any]:
     fixture_yields = {}
     if test.setup:
         for fixture in test.setup:
-            fixture_yield = stack.enter_context(fixture())
+            fixture_yield: Any = stack.enter_context(fixture())
             fixture_yields[fixture.__name__] = fixture_yield
 
     return fixture_yields
@@ -136,18 +141,20 @@ def copy_function_inputs(test: FunctionTest) -> dict[str, Any]:
 
     for arg_name, input_value in test.kwargs.items():
         if callable(input_value):
-            if isinstance(input_value(), AbstractContextManager):
+            if inspect.isgeneratorfunction(input_value):  # type: ignore[arg-type]
                 with input_value() as input_val:
                     result = input_val
             else:
-                result = input_value()
+                result = input_value
         else:
             result = input_value
         isolated_inputs[arg_name] = result
     return isolated_inputs
 
 
-def run_function(test: FunctionTest, isolated_input: dict[str, Any]) -> dict[str, Any]:
+def run_function(
+    test: FunctionTest, isolated_input: dict[str, Any]
+) -> Any:  # noqa: ANN401
     if inspect.iscoroutinefunction(test.function):
         return asyncio.run(test.function(**isolated_input))
     return test.function(**isolated_input)
@@ -171,6 +178,7 @@ def check_test_output(test: FunctionTest, actual_return: Any) -> None:  # noqa: 
             + "which does not match the expected AST for "
             + f"{ast.unparse(test.returns).strip()}"
         )
+    #     assert actual_return.__code__.co_code == test.returns.__code__.co_code, (
     else:
         assert actual_return == test.returns, (
             f"Input {test.kwargs} returned {actual_return} "
@@ -202,7 +210,11 @@ def build_side_effect_vars(test_function: Callable) -> type[BaseModel]:
     )  # type: ignore[call-overload]
 
 
-def check_test_side_effects(test: FunctionTest, isolated_input: dict[str, Any]) -> None:
+def check_test_side_effects(
+    test: FunctionTest,
+    actual_return: Any,  # noqa: ANN401
+    isolated_input: dict[str, Any],
+) -> None:
     if test.side_effects:
         side_effect_sources = get_source(test.side_effects)
         for side_effect_source in side_effect_sources:
@@ -210,7 +222,9 @@ def check_test_side_effects(test: FunctionTest, isolated_input: dict[str, Any]) 
             side_effect_code = ast.unparse(side_effect_ast)
 
             side_effect_arg_model = build_side_effect_vars(test.function)
-            _ = side_effect_arg_model.construct(patches=test.patches, **isolated_input)
+            _ = side_effect_arg_model.construct(
+                patches=test.patches, returns=actual_return, **isolated_input
+            )
             exec(side_effect_code)  # noqa: S102
 
 
@@ -219,6 +233,7 @@ def run_test(
     stack: ExitStack,
     tests_ran: TaskID,
     progress: Progress,
+    enable_auto_test_writer: bool,  # noqa: FBT001
 ) -> None:
     try:
         # programmatically apply any patches defined
@@ -228,17 +243,27 @@ def run_test(
         try:
             # Isolate input arguments
             isolated_input = copy_function_inputs(test)
+
+            if enable_auto_test_writer:
+                # Mock dependent functions to be able to write regression tests
+                mocks = mock_function_dependencies(test.function, stack)
             # Run the test function once for evaluation
             actual_return = run_function(test, isolated_input)
+
+            if enable_auto_test_writer:
+                # Write tests with mock data
+                generate_function_dependency_test_file(test.function, mocks)
+
         except Exception as e:  # noqa: BLE001
             # If we get an exception, check if it's expected
             check_test_exception(test, e)
         else:
             # If we didn't get an exception then check the output normally
-            check_test_output(test, actual_return)
+            if test.returns:
+                check_test_output(test, actual_return)
         finally:
             # Check if we have defined side effects
-            check_test_side_effects(test, isolated_input)
+            check_test_side_effects(test, actual_return, isolated_input)
 
     except AssertionError as e:
         # Stop the progress bar
@@ -271,18 +296,18 @@ def select_functions_to_test(function_name: str) -> list[str]:
     return selected_functions
 
 
-def sort_tests(selected_functions: list[str]) -> list[FunctionTest]:
+def sort_tests(selected_functions: list[str]) -> set[FunctionTest]:
     # Kahn's algo to topologically sort test_graph
     all_nodes_added = False
     num_visited_nodes = 0
-    sorted_tests: list[FunctionTest] = []
+    sorted_tests: set[FunctionTest] = set()
     functions_sorted = []
 
     while not all_nodes_added:
         for func_name in selected_functions:
             func = config.test_graph.functions[func_name]
             if len(func.deps) - num_visited_nodes == 0:
-                sorted_tests.extend(func.tests)
+                sorted_tests.update(func.tests)
                 functions_sorted.append(func_name)
         if len(functions_sorted) == len(selected_functions):
             all_nodes_added = True
@@ -302,14 +327,13 @@ def detect_missing_tests(selected_functions: list[str]) -> list[str]:
     return missing_tests
 
 
-def run(function_name: str) -> None:
+def run(function_name: str, enable_auto_test_writer: bool) -> None:  # noqa: FBT001
     with Progress(
         TextColumn("{task.description}"),
         BarColumn(),
         MofNCompleteColumn(),
         TimeElapsedColumn(),
     ) as progress:
-
         total_num_tests = sum(
             len(func.tests) for func in config.test_graph.functions.values()
         )
@@ -332,4 +356,4 @@ def run(function_name: str) -> None:
         # Run all selecte tests
         for test in sorted_tests:
             with ExitStack() as stack:
-                run_test(test, stack, tests_ran, progress)
+                run_test(test, stack, tests_ran, progress, enable_auto_test_writer)

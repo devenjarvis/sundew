@@ -10,11 +10,11 @@ license = "MIT"
 python = "^3.11"
 pydantic = "^1.10.2"
 typer = {version = "^0.7.0", extras = ["all"]}
+black = "*"
 
 
 [tool.poetry.group.dev.dependencies]
 mypy = "*"
-black = "*"
 ruff = "*"
 poethepoet = "*"
 
@@ -28,13 +28,12 @@ format = "black ."
 format_check = "black . --check"
 lint = "ruff ."
 sundew = "python -m sundew"
-test_examples = "python -m sundew ./examples"
-test_sundew = "python -m sundew ./tests"
+test = "python -m sundew ./tests"
 type = "mypy ."
 
 
 [tool.ruff]
 line-length = 100
 select = ["ALL"]
-ignore = ["D", "T", "ISC", "S101", "ANN101", "COM812"]
+ignore = ["D", "T", "ISC", "S101", "ANN101", "COM812", "TCH003"]
 

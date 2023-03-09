@@ -1,21 +1,21 @@
 import io
 
-from examples.strings import strings
+from examples.examples import side_effects_example
 from sundew.test import test
 
-test(strings.concatenate)(
+test(side_effects_example.concatenate)(
     kwargs={"a": "123", "b": "456"},
     returns="123456",
 )
-test(strings.reverse)(
+test(side_effects_example.reverse)(
     kwargs={"a": "123"},
     returns="321",
 )
-test(strings.make_silly)(
+test(side_effects_example.make_silly)(
     kwargs={"a": "123", "b": "456"},
     returns="321654",
 )
-test(strings.print_string)(
+test(side_effects_example.print_string)(
     kwargs={"a": "123"},
     patches={"sys.stdout": io.StringIO()},
     side_effects=[
