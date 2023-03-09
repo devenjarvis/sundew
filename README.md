@@ -37,6 +37,7 @@ Major things that still need to be done before making public (in rough order):
 - [ ] Documentation
 - [ ] Add code of conduct
 - [ ] Add contribution guidelines
+- [ ] Cache auto regression tests so they have no performance hit
 - [ ] Setup Github Actions to release new versions to PyPi
 - [ ] Release version 0.1.0 to PyPi
 - [ ] Write first blog post, introducing sundew
