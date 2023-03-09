@@ -3,6 +3,15 @@ A new kind of testing framework for Python.
 
 > **Warning**
 > This project is a proof-of-concept still and is not close to being ready for production use. This warning will be updated/removed when that has changed!
+
+## Installation
+Sundew is both a module for writing tests, and a CLI for running them. You can easily install sundew by adding it to your pyproject.toml or by running:
+
+```
+pip install sundew
+```
+
+If you'd like to pin to a specific version, you can check the GitHub Releases tab or PyPi.
   
 ## To-do
 
@@ -23,16 +32,17 @@ Major things that still need to be done before making public (in rough order):
 - [x] Implement untested sub-function detection
 - [x] Implement automatic sub-function test writing
 - [x] Setup Github Actions to run CI on PR
-- [x] Setup Github Actions to release new versions to PyPi
 - [ ] Improve sundew test coverage
 - [ ] Handle more advanced test side-effects (<=, >=, in, etc)
 - [ ] Documentation
 - [ ] Add code of conduct
 - [ ] Add contribution guidelines
+- [ ] Setup Github Actions to release new versions to PyPi
 - [ ] Release version 0.1.0 to PyPi
 - [ ] Write first blog post, introducing sundew
 
 ## Future
+- [ ] Add more complex examples (~0.2.0)
 - [ ] Improve error handling/reporting (right now we throw a lot of exceptions) (~0.2.0)
 - [ ] Improve test failure messages, `warp` is a good example to strive for. (~0.2.0)
 - [ ] Parallel test runner support (~0.2.0)
