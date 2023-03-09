@@ -63,6 +63,42 @@ def mock_function_dependencies(
     return mocks
 
 
+def check_kwargs_for_imports(test_fn: FunctionTest) -> list[list[str]]:
+    imports = []
+    for kwval in test_fn.kwargs.values():
+        if inspect.isfunction(kwval) or inspect.isclass(kwval):
+            module = inspect.getmodule(kwval)
+            qualified_name_array = [module.__name__] if module else []
+            qualified_name_array.append(kwval.__name__)
+            imports.append(qualified_name_array)
+        elif isinstance(kwval, (list, tuple, set)):
+            for el in kwval:
+                if inspect.isfunction(el):
+                    module = inspect.getmodule(el)
+                    qualified_name_array = [module.__name__] if module else []
+                    qualified_name_array.append(el.__name__)
+                    imports.append(qualified_name_array)
+                elif hasattr(el, "__slots__"):
+                    module = inspect.getmodule(type(el))
+                    qualified_name_array = [module.__name__] if module else []
+                    qualified_name_array.append(type(el).__name__)
+                    imports.append(qualified_name_array)
+    return imports
+
+
+def check_returns_for_imports(test_fn: FunctionTest) -> list[list[str]]:
+    imports = []
+    if inspect.isfunction(test_fn.returns):
+        module = inspect.getmodule(test_fn.returns)
+        qualified_name_array = [module.__name__] if module else []
+        qualified_name_array.append(test_fn.returns.__name__)
+        imports.append(qualified_name_array)
+    elif isinstance(test_fn.returns, Path):
+        imports.append(["pathlib", "PosixPath"])
+
+    return imports
+
+
 def generate_naive_function_import(
     mock_name: str, mock_test_functions: set[FunctionTest]
 ) -> list[tuple[str, str]]:
@@ -71,34 +107,9 @@ def generate_naive_function_import(
     imports.append(config.test_graph.functions[mock_name].name.qualified.split("."))
     # Check for any additional functions in kwargs
     for test_fn in mock_test_functions:
-        for kwval in test_fn.kwargs.values():
-            if inspect.isfunction(kwval) or inspect.isclass(kwval):
-                module = inspect.getmodule(kwval)
-                qualified_name_array = [module.__name__] if module else []
-                qualified_name_array.append(kwval.__name__)
-                imports.append(qualified_name_array)
-            elif isinstance(kwval, (list, tuple, set)):
-                for el in kwval:
-                    if inspect.isfunction(el):
-                        module = inspect.getmodule(el)
-                        qualified_name_array = [module.__name__] if module else []
-                        qualified_name_array.append(el.__name__)
-                        imports.append(qualified_name_array)
-                    elif hasattr(el, "__slots__"):
-                        module = inspect.getmodule(type(el))
-                        qualified_name_array = [module.__name__] if module else []
-                        qualified_name_array.append(type(el).__name__)
-                        imports.append(qualified_name_array)
+        imports.extend(check_kwargs_for_imports(test_fn))
+        imports.extend(check_returns_for_imports(test_fn))
 
-    # Check for any additional functions in return
-    for test_fn in mock_test_functions:
-        if inspect.isfunction(test_fn.returns):
-            module = inspect.getmodule(kwval)
-            qualified_name_array = [module.__name__] if module else []
-            qualified_name_array.append(kwval.__name__)
-            imports.append(qualified_name_array)
-        elif isinstance(test_fn.returns, Path):
-            imports.append(["pathlib", "PosixPath"])
     return [
         (
             ".".join(function_under_test[:-1]),

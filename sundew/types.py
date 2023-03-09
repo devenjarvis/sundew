@@ -37,7 +37,9 @@ class FunctionTest:
     def formatted_kwargs(self) -> Any | None:
         formatted_kwargs = []
         for kwarg, kwval in self.kwargs.items():
-            if inspect.isfunction(kwval):
+            if isinstance(kwval, set):
+                formatted_kwargs.append(f"{repr(kwarg)}: {kwval}")
+            elif inspect.isfunction(kwval):
                 formatted_kwargs.append(f"{repr(kwarg)}: {kwval.__name__}")
             else:
                 formatted_kwargs.append(f"{repr(kwarg)}: {repr(kwval)}")
@@ -71,10 +73,10 @@ class FunctionTest:
     def __repr__(self) -> str:
         return "FunctionTest(function={}, kwargs={}, ".format(
             self.function.__name__,
-            self.kwargs,
+            self.formatted_kwargs(),
         ) + "patches={}, returns={}, setup={}, side_effects={})".format(
             self.patches,
-            repr(self.returns),
+            self.formatted_returns(),
             self.setup,
             self.side_effects,
         )
