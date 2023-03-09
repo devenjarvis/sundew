@@ -1,4 +1,4 @@
-from pathlib import PosixPath
+from pathlib import Path
 
 from sundew.test import test
 from sundew.test_writer import (
@@ -12,9 +12,8 @@ from sundew.types import FunctionTest
 
 test(build_file_path)(
     kwargs={"fn": generate_function_dependency_test_file},
-    returns=PosixPath(
-        "/Users/devenjarvis/Code/sundew/tests/test_writer/auto_test_generate_function_dependency_test_file.py"
-    ),
+    returns=Path.home()
+    / "Code/sundew/tests/test_writer/auto_test_generate_function_dependency_test_file.py",
 )
 test(build_import_string)(
     kwargs={"generated_test_file_imports": set()},
@@ -31,9 +30,8 @@ test(generate_naive_function_import)(
                 function=build_file_path,
                 kwargs={"fn": generate_function_dependency_test_file},
                 patches={},
-                returns=PosixPath(
-                    "/Users/devenjarvis/Code/sundew/tests/test_writer/auto_test_generate_function_dependency_test_file.py"
-                ),
+                returns=Path.home()
+                / "Code/sundew/tests/test_writer/auto_test_generate_function_dependency_test_file.py",  # noqa: E501
                 setup=set(),
                 side_effects=[],
             )
@@ -118,9 +116,8 @@ test(generate_naive_function_import)(
                             function=build_file_path,
                             kwargs={"fn": generate_function_dependency_test_file},
                             patches={},
-                            returns=PosixPath(
-                                "/Users/devenjarvis/Code/sundew/tests/test_writer/auto_test_generate_function_dependency_test_file.py"
-                            ),
+                            returns=Path.home()
+                            / "Code/sundew/tests/test_writer/auto_test_generate_function_dependency_test_file.py",  # noqa: E501
                             setup=set(),
                             side_effects=[],
                         )
