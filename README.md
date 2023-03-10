@@ -34,10 +34,10 @@ Major things that still need to be done before making public (in rough order):
 - [x] Setup Github Actions to run CI on PR
 - [ ] Improve sundew test coverage
 - [ ] Handle more advanced test side-effects (<=, >=, in, etc)
-- [ ] Documentation
 - [x] Add code of conduct
 - [ ] Add contribution guidelines
 - [ ] Cache auto regression tests so they have no performance hit
+- [ ] Documentation
 - [ ] Expand Python version compatibility
 - [ ] Setup Github Actions to release new versions to PyPi
 - [ ] Release version 0.1.0 to PyPi
