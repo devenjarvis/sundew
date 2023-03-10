@@ -46,16 +46,15 @@ def run(
                             ...
                     else:
                         ...
-    else:
-        if spec := importlib.util.spec_from_file_location("module.name", module):
-            imported_module = importlib.util.module_from_spec(spec)
-            sys.modules["module.name"] = imported_module
-            if spec.loader:
-                spec.loader.exec_module(imported_module)
-            else:
-                ...
+    elif spec := importlib.util.spec_from_file_location("module.name", module):
+        imported_module = importlib.util.module_from_spec(spec)
+        sys.modules["module.name"] = imported_module
+        if spec.loader:
+            spec.loader.exec_module(imported_module)
         else:
             ...
+    else:
+        ...
 
     test.run(function_name=function, enable_auto_test_writer=auto_test_writer)
 

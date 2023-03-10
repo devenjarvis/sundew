@@ -71,7 +71,7 @@ def check_kwargs_for_imports(test_fn: FunctionTest) -> list[list[str]]:
             qualified_name_array = [module.__name__] if module else []
             qualified_name_array.append(kwval.__name__)
             imports.append(qualified_name_array)
-        elif isinstance(kwval, (list, tuple, set)):
+        elif isinstance(kwval, list | tuple | set):
             for el in kwval:
                 if inspect.isfunction(el):
                     module = inspect.getmodule(el)
