@@ -32,11 +32,11 @@ Major things that still need to be done before making public (in rough order):
 - [x] Implement untested sub-function detection
 - [x] Implement automatic sub-function test writing
 - [x] Setup Github Actions to run CI on PR
+- [x] Add code of conduct
+- [x] Add contribution guidelines
 - [ ] Improve sundew test coverage
 - [ ] Handle more advanced test side-effects (<=, >=, in, etc)
-- [x] Add code of conduct
-- [ ] Add contribution guidelines
-- [ ] Cache auto regression tests so they have no performance hit
+- [ ] Cache auto regression tests so they have no performance impact
 - [ ] Documentation
 - [ ] Expand Python version compatibility
 - [ ] Setup Github Actions to release new versions to PyPi
