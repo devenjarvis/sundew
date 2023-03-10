@@ -35,7 +35,7 @@ Major things that still need to be done before making public (in rough order):
 - [ ] Improve sundew test coverage
 - [ ] Handle more advanced test side-effects (<=, >=, in, etc)
 - [ ] Documentation
-- [ ] Add code of conduct
+- [x] Add code of conduct
 - [ ] Add contribution guidelines
 - [ ] Cache auto regression tests so they have no performance hit
 - [ ] Expand Python version compatibility
