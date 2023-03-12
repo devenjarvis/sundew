@@ -1,0 +1,7 @@
+- Getting started
+  - [About](README.md)
+  - [Installation](more-pages.md)
+- Writing Tests
+  - [Custom navbar](custom-navbar.md)
+  - [Cover page](cover.md)
+- Using The CLI
