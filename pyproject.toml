@@ -23,6 +23,7 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poe.tasks]
+docs = "docsify serve ./docs"
 fix = "ruff . --fix"
 format = "black ."
 format_check = "black . --check"
