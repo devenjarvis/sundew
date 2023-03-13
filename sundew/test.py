@@ -89,6 +89,7 @@ def get_test_function(fn: Callable) -> Callable:
 
 def test(fn: Callable) -> Callable:
     def add_test(
+        cache: bool = False,  # noqa: FBT
         setup: set[Callable[[], _GeneratorContextManager[Any]]] | None = None,
         kwargs: dict | None = None,
         returns: Any | None = None,
@@ -101,6 +102,7 @@ def test(fn: Callable) -> Callable:
             FunctionTest(
                 function=get_test_function(fn),
                 kwargs=kwargs or {},
+                cache=cache,
                 location=f"{os.path.relpath(inspect.stack()[1][1])}:{inspect.stack()[1][2]}",
                 patches=patches or {},
                 returns=returns,
@@ -155,6 +157,9 @@ def copy_function_inputs(test: FunctionTest) -> dict[str, Any]:
 def run_function(
     test: FunctionTest, isolated_input: dict[str, Any]
 ) -> Any:  # noqa: ANN401
+    if test.cache and config.cache.contains(test.function, test.kwargs):
+        return config.cache.get_cached_value(test.function, test.kwargs)
+
     if inspect.iscoroutinefunction(test.function):
         return asyncio.run(test.function(**isolated_input))
     return test.function(**isolated_input)
@@ -244,9 +249,9 @@ def run_test(
             # Isolate input arguments
             isolated_input = copy_function_inputs(test)
 
-            if enable_auto_test_writer:
-                # Mock dependent functions to be able to write regression tests
-                mocks = mock_function_dependencies(test.function, stack)
+            # Mock dependent functions to be able to write regression tests
+            mocks = mock_function_dependencies(test.function, stack)
+
             # Run the test function once for evaluation
             actual_return = run_function(test, isolated_input)
 
@@ -279,6 +284,9 @@ def run_test(
         print(f"\n[bold orange1]ERROR[/] {test.location} - {str(e)}")
         sys.exit(1)
     else:
+        if test.cache:
+            config.cache.update(test.function, test.kwargs, actual_return)
+
         progress.advance(tests_ran)
 
 
@@ -296,18 +304,18 @@ def select_functions_to_test(function_name: str) -> list[str]:
     return selected_functions
 
 
-def sort_tests(selected_functions: list[str]) -> set[FunctionTest]:
+def sort_tests(selected_functions: list[str]) -> list[FunctionTest]:
     # Kahn's algo to topologically sort test_graph
     all_nodes_added = False
     num_visited_nodes = 0
-    sorted_tests: set[FunctionTest] = set()
+    sorted_tests: list[FunctionTest] = []
     functions_sorted = []
 
     while not all_nodes_added:
         for func_name in selected_functions:
             func = config.test_graph.functions[func_name]
             if len(func.deps) - num_visited_nodes == 0:
-                sorted_tests.update(func.tests)
+                sorted_tests.extend(func.tests)
                 functions_sorted.append(func_name)
         if len(functions_sorted) == len(selected_functions):
             all_nodes_added = True
@@ -353,7 +361,7 @@ def run(function_name: str, enable_auto_test_writer: bool) -> None:  # noqa: FBT
 
         tests_ran = progress.add_task("Running tests...", total=len(sorted_tests))
 
-        # Run all selecte tests
+        # Run all selected tests
         for test in sorted_tests:
             with ExitStack() as stack:
                 run_test(test, stack, tests_ran, progress, enable_auto_test_writer)

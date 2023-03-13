@@ -1,3 +1,4 @@
+import time
 from math import sqrt
 
 
@@ -33,3 +34,13 @@ def quadratic(a: int, b: int, c: int) -> tuple[float, float]:
     )
 
     return (positive_solution, negative_solution)
+
+
+# Used to validate cache functionality
+def wait_2_sec() -> int:
+    simple_sleep(2)
+    return 4
+
+
+def simple_sleep(secs: int) -> None:
+    time.sleep(secs)

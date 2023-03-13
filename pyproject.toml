@@ -7,16 +7,19 @@ readme = "README.md"
 license = "MIT"
 
 [tool.poetry.dependencies]
+black = "*"
+cachetools = "*"
 python = "^3.11"
 pydantic = "^1.10.2"
 typer = {version = "^0.7.0", extras = ["all"]}
-black = "*"
+
 
 
 [tool.poetry.group.dev.dependencies]
 mypy = "*"
 ruff = "*"
 poethepoet = "*"
+types-cachetools = "*"
 
 [build-system]
 requires = ["poetry-core"]
@@ -36,5 +39,5 @@ type = "mypy ."
 [tool.ruff]
 line-length = 100
 select = ["ALL"]
-ignore = ["D", "T", "ISC", "S101", "ANN101", "COM812", "TCH003"]
+ignore = ["D", "T", "ISC", "S101", "ANN101", "COM812", "TCH003", "PLR0913"]
 

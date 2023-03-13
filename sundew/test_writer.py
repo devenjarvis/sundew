@@ -21,10 +21,16 @@ class DependentFunctionSpy:
     def __call__(
         self, *args: tuple[Any, ...], **kwargs: dict[str, Any]
     ) -> Any:  # noqa: ANN401
+        generated_kwargs = inspect.getcallargs(self.func, *args, **kwargs)
+
+        # Check cache
+        if config.cache.contains(self.func, generated_kwargs):
+            return config.cache.get_cached_value(self.func, generated_kwargs)
+
         answer = self.func(*args, **kwargs)
         function_test = FunctionTest(
             function=self.func,
-            kwargs=inspect.getcallargs(self.func, *args, **kwargs),
+            kwargs=generated_kwargs,
             returns=answer,
         )
         self.calls.add(function_test)

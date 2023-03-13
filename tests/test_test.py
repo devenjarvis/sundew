@@ -44,28 +44,28 @@ test(sundew_test.select_functions_to_test)(
 test(sundew_test.sort_tests)(
     setup={fixtures.extend_config_with_dependent_functions},
     kwargs={"selected_functions": ["dependent_func", "callee_func"]},
-    returns={
+    returns=[
         fixtures.dependent_func_function_test,
         fixtures.callee_func_function_test,
-    },
+    ],
 )(
     # Should get same output, regardless of input order
     setup={fixtures.extend_config_with_dependent_functions},
     kwargs={"selected_functions": ["callee_func", "dependent_func"]},
-    returns={
+    returns=[
         fixtures.dependent_func_function_test,
         fixtures.callee_func_function_test,
-    },
+    ],
 )(
     # Make sure sorting works with only 1 element
     setup={fixtures.extend_config_with_dependent_functions},
     kwargs={"selected_functions": ["dependent_func"]},
-    returns={fixtures.dependent_func_function_test},
+    returns=[fixtures.dependent_func_function_test],
 )(
     # Make sure sorting works with zero elements
     setup={fixtures.extend_config_with_dependent_functions},
     kwargs={"selected_functions": []},
-    returns={},
+    returns=[],
 )
 
 # test(sundew_test.detect_missing_tests)(
