@@ -32,6 +32,7 @@ class DependentFunctionSpy:
             function=self.func,
             kwargs=generated_kwargs,
             returns=answer,
+            cache=True,
         )
         self.calls.add(function_test)
         return answer

@@ -57,6 +57,8 @@ class FunctionTest:
     def __str__(self) -> str:
         test_string = ""
         test_string += f"test({self.name.simple})(\n"
+        if self.cache:
+            test_string += f"\tcache={self.cache},\n"
         if self.patches:
             test_string += f"\tpatches={self.patches},\n"
         if self.setup:
@@ -73,7 +75,8 @@ class FunctionTest:
         return test_string.replace("'", '"')
 
     def __repr__(self) -> str:
-        return "FunctionTest(function={}, kwargs={}, ".format(
+        return "FunctionTest(function={}, cache={}, kwargs={}, ".format(
+            self.cache,
             self.function.__name__,
             format_kwargs(self.kwargs),
         ) + "patches={}, returns={}, setup={}, side_effects={})".format(
