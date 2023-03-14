@@ -1,7 +1,10 @@
-- Getting started
+<!-- - Getting started
   - [About](README.md)
-  - [Installation](more-pages.md)
+  - [Installation](install.md)
 - Writing Tests
   - [Custom navbar](custom-navbar.md)
-  - [Cover page](cover.md)
-- Using The CLI
+- Using The CLI -->
+* [Getting Started](README.md)
+* [Writing Tests](writing-tests.md)
+* [Using the CLI](cli.md)
+* [Changelog](changelog.md)

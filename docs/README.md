@@ -1,59 +1,34 @@
 <h1 align="center"> sundew :sunny: </h1>
-<p align="center"> A new kind of testing framework for Python. </p>
+<p align="center"> Function-Based Testing for Python. </p>
 
-> **Warning**
-> This project is a proof-of-concept still and is not close to being ready for production use. This warning will be updated/removed when that has changed!
+## About
+Sundew is a testing framework for Python, implementing a new approach to testing that I call "function-based testing". This approach takes the overlap of functional programming concepts, and the best practices for writing tests that we already know, and enforces them to enable some really powerful features that make testing easier and more effective. 
+
+Sundew is still very new, and we've just scratched the surface of function-based testing, but some features implemented already include:
+- Smart test ordering, improving our odds to fail fast
+- Detection of functions without any tests
+- Automatic writing of regression tests, without any cost to your test suite run time 
+
+Beyond these unique features, Sundew also less tangible but just-as-impactful ergonomic benefits like:
+- Enforcing good test practices like the Single Responsibility Principle, and test isolation
+- Eliminating many case where typical tests can "silently pass" when they shouldn't
+- An opinionated syntax that makes it dead simple to understand what is being tested
+
+If you'd like to learn more about function-based testing and Sundew, checkout our launch blog post [here]().
 
 ## Installation
-Sundew is both a module for writing tests, and a CLI for running them. You can easily install sundew by adding it to your pyproject.toml or by running:
 
-```python
-from sundew import test
+Sundew is both a module for writing tests, and a CLI for running them. Once you're ready to get started you can easily install sundew by adding it to your pyproject.toml and/or by running:
 
-test(my_funtion)(
-    kwargs={"a": 1},
-    returns=2,
-)
+```pip
+pip install sundew
+```
+or
+```poetry
+poetry add sundew --group dev
 ```
 
-If you'd like to pin to a specific version, you can check the GitHub Releases tab or PyPi.
-  
-## To-do
+Now you're ready to start using sundew :tada:
 
-Major things that still need to be done before making public (in rough order):  
-
-- [x] Handle test output failures  
-- [x] Handle test errors
-- [x] Handle basic test side-effects
-- [x] Basic enforcing of test isolation (Isolate inputs)
-- [x] Simplify writing multiple tests for a function
-- [x] Look into a better side_effect signature
-- [x] Fixtures (Basics implemented)
-- [x] Write initial tests for sundew
-- [x] ~Figure out test naming~ (Decided this isn't necessary for now)
-- [x] Basic test selection support (Can select tests by function name with --function option)
-- [x] Asyncio support/examples (basic implementation)
-- [x] Implement smart test runner
-- [x] Implement untested sub-function detection
-- [x] Implement automatic sub-function test writing
-- [x] Setup Github Actions to run CI on PR
-- [x] Add code of conduct
-- [x] Add contribution guidelines
-- [ ] Improve sundew test coverage
-- [ ] Handle more advanced test side-effects (<=, >=, in, etc)
-- [ ] Cache auto regression tests so they have no performance impact
-- [ ] Documentation
-- [ ] Expand Python version compatibility
-- [ ] Setup Github Actions to release new versions to PyPi
-- [ ] Release version 0.1.0 to PyPi
-- [ ] Write first blog post, introducing sundew
-
-## Future
-- [ ] Add more complex examples (~0.2.0)
-- [ ] Improve error handling/reporting (right now we throw a lot of exceptions) (~0.2.0)
-- [ ] Improve test failure messages, `warp` is a good example to strive for. (~0.2.0)
-- [ ] Parallel test runner support (~0.2.0)
-- [ ] testmon-like functionality (~0.3.0)
-- [ ] Mutation testing/coverage reporting (~0.4.0)
-- [ ] Hypothesis integration (maybe?)
-- [ ] Test-case generation for runtime exceptions (maybe?)
+> **Warning:**
+> Sundew is still pre-1.0, and likely will be for some time. I believe the foundation is fairly set, but make no guarantees yet on breaking changes. If you'd like to pin to a specific version, you can check the GitHub Releases tab or PyPi to find the latest. 
