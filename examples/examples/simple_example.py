@@ -37,9 +37,8 @@ def quadratic(a: int, b: int, c: int) -> tuple[float, float]:
 
 
 # Used to validate cache functionality
-def wait_2_sec() -> int:
+def wait_2_sec() -> None:
     simple_sleep(2)
-    return 4
 
 
 def simple_sleep(secs: int) -> None:

@@ -91,8 +91,8 @@ def test(fn: Callable) -> Callable:
     def add_test(
         cache: bool = False,  # noqa: FBT
         setup: set[Callable[[], _GeneratorContextManager[Any]]] | None = None,
-        kwargs: dict | None = None,
-        returns: Any | None = None,
+        kwargs: dict[str, Any] | None = None,
+        returns: Any | Exception | None = None,
         patches: dict | None = None,
         side_effects: list[Callable] | None = None,
     ) -> Callable:
