@@ -36,7 +36,7 @@ Major things that still need to be done before making public (in rough order):
 - [x] Add contribution guidelines
 - [ ] Improve sundew test coverage
 - [ ] Handle more advanced test side-effects (<=, >=, in, etc)
-- [ ] Cache auto regression tests so they have no performance impact
+- [x] Cache auto regression tests so they have no performance impact
 - [ ] Documentation
 - [ ] Expand Python version compatibility
 - [ ] Setup Github Actions to release new versions to PyPi
