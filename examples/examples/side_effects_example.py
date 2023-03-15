@@ -14,4 +14,4 @@ def print_string(a: str) -> None:
     print(a)  # noqa: T201
 
 def print_hello(name: str) -> None:
-    print(f"Hello, {name}")
+    print(f"Hello, {name}") # noqa: T201
