@@ -93,7 +93,7 @@ def test(fn: Callable) -> Callable:
         setup: set[Callable[[], _GeneratorContextManager[Any]]] | None = None,
         kwargs: dict[str, Any] | None = None,
         returns: Any | Exception | None = None,
-        patches: dict | None = None,
+        patches: dict[str, Any] | None = None,
         side_effects: list[Callable] | None = None,
     ) -> Callable:
         update_test_graph(fn)
