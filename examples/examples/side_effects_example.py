@@ -13,5 +13,6 @@ def make_silly(a: str, b: str) -> str:
 def print_string(a: str) -> None:
     print(a)  # noqa: T201
 
+
 def print_hello(name: str) -> None:
-    print(f"Hello, {name}") # noqa: T201
+    print(f"Hello, {name}")  # noqa: T201
