@@ -15,6 +15,11 @@
 
   <script>
     window.$docsify = {
+      loadSidebar: true,
+      subMaxLevel: 2,
+      auto2top: true,
+      homepage: 'pages/getting-started.md',
+      routerMode: 'history',
       darklightTheme: {
         dark: {
           accent: '#fec957',
@@ -24,10 +29,16 @@
           accent: '#fec957',
         }
       },
-      loadSidebar: true,
-      subMaxLevel: 2,
+      alias: {
+        '/getting-started': '/pages/getting-started',
+        '/writing-tests': '/pages/writing-tests',
+        '/cli': '/pages/cli',
+        '/changelog': '/pages/changelog'
+      },
+
+
       el: '#main',
-      name: '',
+      name: 'sundew',
       repo: 'https://github.com/devenjarvis/sundew/'
     }
   </script>
