@@ -39,9 +39,9 @@ Major things that still need to be done before making public (in rough order):
 - [x] Expand Python version compatibility (Now supports Python 3.9 -> 3.11)
 - [ ] Improve sundew test coverage
 - [ ] Handle more advanced test side-effects (<=, >=, in, etc)
-- [ ] Setup Github Actions to release new versions to PyPi
 - [ ] Add "Here be dragons" disclaimers to docs
 - [ ] Upate README and move to do list into GH issues
+- [ ] Setup Github Actions to build and release new versions to PyPi
 - [ ] Release version 0.1.0 to PyPi
 - [ ] Write first blog post, introducing sundew
 
