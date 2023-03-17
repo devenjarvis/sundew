@@ -18,13 +18,13 @@ def format_kwargs(kwargs: dict[str, Any]) -> str:
     return f"{{{', '.join(formatted_kwargs)}}}"
 
 
-@dataclass(slots=True, eq=True)
+@dataclass(eq=True)
 class FunctionName:
     simple: str
     qualified: str
 
 
-@dataclass(slots=True, eq=True)
+@dataclass(eq=True)
 class FunctionTest:
     function: Callable
     location: str = ""
@@ -100,7 +100,7 @@ class FunctionTest:
         return self.function.__name__ < other.function.__name__
 
 
-@dataclass(slots=True)
+@dataclass
 class Function:
     declaration: Callable
     tests: set[FunctionTest] = field(default_factory=set)
