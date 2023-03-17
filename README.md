@@ -40,6 +40,8 @@ Major things that still need to be done before making public (in rough order):
 - [ ] Improve sundew test coverage
 - [ ] Handle more advanced test side-effects (<=, >=, in, etc)
 - [ ] Setup Github Actions to release new versions to PyPi
+- [ ] Add "Here be dragons" disclaimers to docs
+- [ ] Upate README and move to do list into GH issues
 - [ ] Release version 0.1.0 to PyPi
 - [ ] Write first blog post, introducing sundew
 
