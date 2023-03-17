@@ -3,7 +3,7 @@ from collections.abc import Callable
 from contextlib import _GeneratorContextManager
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 
 def format_kwargs(kwargs: dict[str, Any]) -> str:
@@ -31,7 +31,7 @@ class FunctionTest:
     cache: bool = False
     kwargs: dict[str, Any] = field(default_factory=dict)
     patches: dict[str, Any] = field(default_factory=dict)
-    returns: Any | None = None
+    returns: Optional[Any] = None
     setup: set[Callable[[], _GeneratorContextManager[Any]]] = field(default_factory=set)
     side_effects: list[Callable[[Any], bool]] = field(default_factory=list)
 
@@ -47,7 +47,7 @@ class FunctionTest:
 
         return FunctionName(simple=simple_name, qualified=qualified_name)
 
-    def formatted_returns(self) -> Any | None:
+    def formatted_returns(self) -> Optional[Any]:
         if isinstance(self.returns, str):
             return repr(self.returns).replace('"', r"\"")
         if isinstance(self.returns, Path):
