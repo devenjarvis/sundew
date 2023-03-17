@@ -1,4 +1,5 @@
 * [Getting Started](getting-started.md)
+* [About Sundew](about.md)
 * [Writing Tests](writing-tests.md)
 * [Using the CLI](cli.md)
 * [Changelog](changelog.md)
