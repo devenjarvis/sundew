@@ -1,7 +1,5 @@
-- Getting started
-  - [About](README.md)
-  - [Installation](more-pages.md)
-- Writing Tests
-  - [Custom navbar](custom-navbar.md)
-  - [Cover page](cover.md)
-- Using The CLI
+* [Getting Started](getting-started.md)
+* [About Sundew](about.md)
+* [Writing Tests](writing-tests.md)
+* [Using the CLI](cli.md)
+* [Changelog](changelog.md)

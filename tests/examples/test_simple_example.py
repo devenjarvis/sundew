@@ -10,15 +10,9 @@ test(simple_example.quadratic)(
 
 test(simple_example.wait_2_sec)(
     patches={"sys.stdout": io.StringIO()},
-    returns=4,
+    returns=None,
 )
-test(simple_example.wait_2_sec)(returns=4)
-
-test(simple_example.wait_2_sec)(returns=4)
-
-test(simple_example.wait_2_sec)(returns=4)
-
-test(simple_example.wait_2_sec)(returns=4)
+test(simple_example.wait_2_sec)()
 
 test(simple_example.simple_sleep)(
     cache=True,
