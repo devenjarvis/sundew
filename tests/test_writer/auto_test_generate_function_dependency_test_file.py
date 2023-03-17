@@ -154,13 +154,7 @@ test(generate_naive_function_import)(
             ),
         },
     },
-    returns=[
-        ("sundew.test_writer", "generate_naive_function_import"),
-        ("sundew.types", "FunctionTest"),
-        ("sundew.types", "FunctionTest"),
-        ("sundew.types", "FunctionTest"),
-        ("sundew.types", "FunctionTest"),
-    ],
+    returns=[("sundew.test_writer", "generate_naive_function_import")],
 )
 test(generate_naive_function_import)(
     kwargs={

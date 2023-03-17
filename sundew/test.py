@@ -7,7 +7,7 @@ import sys
 from collections.abc import Callable, Coroutine
 from contextlib import ExitStack, _GeneratorContextManager
 from functools import wraps
-from typing import Any
+from typing import Any, Optional, Union
 from unittest.mock import patch
 
 from pydantic import BaseConfig, BaseModel, create_model
@@ -90,11 +90,11 @@ def get_test_function(fn: Callable) -> Callable:
 def test(fn: Callable) -> Callable:
     def add_test(
         cache: bool = False,  # noqa: FBT
-        setup: set[Callable[[], _GeneratorContextManager[Any]]] | None = None,
-        kwargs: dict[str, Any] | None = None,
-        returns: Any | Exception | None = None,
-        patches: dict[str, Any] | None = None,
-        side_effects: list[Callable] | None = None,
+        setup: Optional[set[Callable[[], _GeneratorContextManager[Any]]]] = None,
+        kwargs: Optional[dict[str, Any]] = None,
+        returns: Union[Any, Exception, None] = None,
+        patches: Optional[dict[str, Any]] = None,
+        side_effects: Optional[list[Callable]] = None,
     ) -> Callable:
         update_test_graph(fn)
 
