@@ -1,5 +1,6 @@
 from collections.abc import Iterator
 from contextlib import contextmanager
+from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel
@@ -60,6 +61,17 @@ passing_function_test_with_defaults = FunctionTest(
     function=example_fn_2,
     kwargs={"a": 1},
     returns="hello1",
+)
+
+function_test_with_path_returns = FunctionTest(
+    location="tests/fixtures.py:1000",
+    function=example_fn_1,
+    kwargs={"a": 1, "b": "2"},
+    returns=Path("tmp/test"),
+)
+
+function_test_with_function_kwargs = FunctionTest(
+    location="tests/fixtures.py:1000", function=example_fn_1, kwargs={"a": example_fn_2}
 )
 
 
