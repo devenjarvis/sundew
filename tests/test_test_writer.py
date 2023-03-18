@@ -1,10 +1,10 @@
+import unittest
 from contextlib import ExitStack
 from pathlib import Path
 
 from sundew import test_writer
 from sundew.test import test
 from tests import fixtures
-import unittest
 
 test(test_writer.mock_function_dependencies)(
     setup={fixtures.extend_config_with_dependent_functions},
@@ -46,7 +46,7 @@ test(test_writer.generate_function_dependency_test_file)(
 # TODO: Fix multilin lambda side_effects
 test(test_writer.write_tests_to_file)(
     kwargs={
-        "file_path": Path("/tmp/example.py"),
+        "file_path": Path("/tmp/example.py"),  # noqa: S108
         "generated_test_file_import_string": "from sundew import test\n",
         "generated_test_file": "test(example)()",
     },
