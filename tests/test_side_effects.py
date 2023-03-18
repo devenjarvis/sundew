@@ -8,7 +8,9 @@ test(side_effects.ConvertSideEffect.visit)(
         "self": side_effects.ConvertSideEffect(),
         "node": ast.parse("lambda a: a.b == a.c"),
     },
-    returns=ast.parse("assert a.b == a.c, f'left={a.b} right={a.c}'"),
+    returns=ast.parse(
+        """assert a.b == a.c, f"Side-effect 'a.b == a.c' failed because: a.b == {a.b}, and {a.b} != {a.c}" """  # noqa: E501
+    ),
 )
 
 test(side_effects.SideEffectGetter.visit_Lambda)(

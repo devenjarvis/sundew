@@ -37,8 +37,8 @@ Major things that still need to be done before making public (in rough order):
 - [x] Cache auto regression tests so they have no performance impact
 - [x] Documentation
 - [x] Expand Python version compatibility (Now supports Python 3.9 -> 3.11)
+- [x] Handle more advanced test side-effects (<=, >=, in, etc)
 - [ ] Improve sundew test coverage
-- [ ] Handle more advanced test side-effects (<=, >=, in, etc)
 - [ ] Add "Here be dragons" disclaimers to docs
 - [ ] Upate README and move to do list into GH issues
 - [ ] Setup Github Actions to build and release new versions to PyPi
