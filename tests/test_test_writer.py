@@ -1,6 +1,7 @@
 import unittest
 from contextlib import ExitStack
 from pathlib import Path
+from unittest.mock import MagicMock
 
 from sundew import test_writer
 from sundew.test import test
@@ -46,11 +47,14 @@ test(test_writer.generate_function_dependency_test_file)(
 # TODO: Fix multilin lambda side_effects
 test(test_writer.write_tests_to_file)(
     kwargs={
-        "file_path": Path("/tmp/example.py"),  # noqa: S108
+        "file_path": Path("/example.py"),
         "generated_test_file_import_string": "from sundew import test\n",
         "generated_test_file": "test(example)()",
     },
-    patches={"sundew.test_writer.Path.open": unittest.mock.mock_open()},
+    patches={
+        "sundew.test_writer.Path.open": unittest.mock.mock_open(),
+        "black.format_file_in_place": MagicMock(),
+    },
     side_effects=[
         lambda _: _.patches["sundew.test_writer.Path.open"].mock_calls[0].args
         == ("w",),
