@@ -9,7 +9,7 @@ Sundew is still very new, and we've just scratched the surface of function-based
 - Detection of functions without any tests
 - Automatic writing of regression tests, without any cost to your test suite run time 
 
-Beyond these unique features, Sundew also less tangible but just-as-impactful ergonomic benefits like:
+Beyond these unique features, Sundew also has other benefits like:
 - Enforcing good test practices like the Single Responsibility Principle, and test isolation
 - Eliminating many case where typical tests can "silently pass" when they shouldn't
 - An opinionated syntax that makes it dead simple to understand what is being tested
