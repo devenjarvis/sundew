@@ -9,5 +9,5 @@ This project is maintained by a single part-time individual, so there is **no gu
 If you are excited about trying something brand new and are willing to except the edges, please continue! However if you or your project is not ready to take on this amount of risk, I recommend keeping an eye on this project and waiting a bit before diving in. I'll update this section as the project matures.
 
 ## Documentation 📖
-Documentation for sundew can be found [here]()
+Documentation for sundew can be found [here](https://devenjarvis.github.io/sundew/)
 
