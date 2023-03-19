@@ -1,56 +1,13 @@
 # sundew ☀️
 A new kind of testing framework for Python.
 
-> **Warning**
-> This project is a proof-of-concept still and is not close to being ready for production use. This warning will be updated/removed when that has changed!
+## Here Be Dragons 🐉
+Not only does this project attempt a new approach to testing, it is also in _very_ early stages and thus still has alot of sharp edges. Early adopters are encouraged to try out sundew and report any issues or critical missing functionality in the form of a GitHub Issue. 
 
-## Installation
-Sundew is both a module for writing tests, and a CLI for running them. You can easily install sundew by adding it to your pyproject.toml or by running:
+This project is maintained by a single part-time individual, so there is **no guarantee** on how quickly those will be addressed, however bug fixes and critical functionailty will be significantly prioritizd over expanded functionailty at this stage of the project. PRs are also welcome for those who are interested in [contributing](CONTRIBUTING.md).
 
-```
-pip install sundew
-```
+If you are excited about trying something brand new and are willing to except the edges, please continue! However if you or your project is not ready to take on this amount of risk, I recommend keeping an eye on this project and waiting a bit before diving in. I'll update this section as the project matures.
 
-If you'd like to pin to a specific version, you can check the GitHub Releases tab or PyPi.
-  
-## To-do
+## Documentation 📖
+Documentation for sundew can be found [here]()
 
-Major things that still need to be done before making public (in rough order):  
-
-- [x] Handle test output failures  
-- [x] Handle test errors
-- [x] Handle basic test side-effects
-- [x] Basic enforcing of test isolation (Isolate inputs)
-- [x] Simplify writing multiple tests for a function
-- [x] Look into a better side_effect signature
-- [x] Fixtures (Basics implemented)
-- [x] Write initial tests for sundew
-- [x] ~Figure out test naming~ (Decided this isn't necessary for now)
-- [x] Basic test selection support (Can select tests by function name with --function option)
-- [x] Asyncio support/examples (basic implementation)
-- [x] Implement smart test runner
-- [x] Implement untested sub-function detection
-- [x] Implement automatic sub-function test writing
-- [x] Setup Github Actions to run CI on PR
-- [x] Add code of conduct
-- [x] Add contribution guidelines
-- [x] Cache auto regression tests so they have no performance impact
-- [x] Documentation
-- [x] Expand Python version compatibility (Now supports Python 3.9 -> 3.11)
-- [x] Handle more advanced test side-effects (<=, >=, in, etc)
-- [ ] Improve sundew test coverage
-- [ ] Add "Here be dragons" disclaimers to docs
-- [ ] Upate README and move to do list into GH issues
-- [ ] Setup Github Actions to build and release new versions to PyPi
-- [ ] Release version 0.1.0 to PyPi
-- [ ] Write first blog post, introducing sundew
-
-## Future
-- [ ] Add more complex examples (~0.2.0)
-- [ ] Improve error handling/reporting (right now we throw a lot of exceptions) (~0.2.0)
-- [ ] Improve test failure messages, `warp` is a good example to strive for. (~0.2.0)
-- [ ] Parallel test runner support (~0.2.0)
-- [ ] testmon-like functionality (~0.3.0)
-- [ ] Mutation testing/coverage reporting (~0.4.0)
-- [ ] Hypothesis integration (maybe?)
-- [ ] Test-case generation for runtime exceptions (maybe?)
