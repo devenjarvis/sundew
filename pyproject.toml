@@ -15,7 +15,7 @@ typer = {version = "^0.7.0", extras = ["all"]}
 poetry = "^1.4.0"
 
 [tool.poetry.scripts]
-sundew = "sundew.main:main"
+sundew = "sundew.main:app"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "*"
@@ -33,8 +33,8 @@ fix = "ruff . --fix"
 format = "black ."
 format_check = "black . --check"
 lint = "ruff ."
-sundew = "python -m sundew"
-test = "python -m sundew ./tests"
+sundew = "sundew"
+test = "sundew ./tests"
 type = "mypy ."
 
 
