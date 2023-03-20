@@ -35,6 +35,6 @@ test(side_effects_example.print_hello)(
     kwargs={"name": "Dave"},
     patches={"sys.stdout": io.StringIO()},
     side_effects=[
-        lambda _: _.patches["sys.stdout"].getvalue() == "Hello, Dabe\n",
+        lambda _: _.patches["sys.stdout"].getvalue() == "Hello, Dave\n",
     ],
 )
