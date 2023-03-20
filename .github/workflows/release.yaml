@@ -9,7 +9,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.11"]
-        poetry-version: ["1.4.0"]
+        poetry-version: ["1.4.1"]
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
@@ -27,5 +27,4 @@ jobs:
         run: |
           poetry config pypi-token.pypi $PYPI_TOKEN
           poetry version $(git describe --tags --abbrev=0)
-          poetry build
-          poetry publish
+          poetry publish --build
