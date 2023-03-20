@@ -87,9 +87,7 @@ Our `side_effects` _might_ look a bit ugly at first glance, but when designing s
 Now you may be wondering why we named the argument to the lambda `_`, and note **This is the required argument name**. Ultimately it came down to the shortest syntax that didn't feel _too much_ like magic, that your linter won't yell at you about. The keen observer will now be wondering why/how sundew enforces what you name this argument, it should be able to be anything... right? Well sundew does have a _bit_ of magic here, as we parse the AST of these lambdas and convert them into assertions so we're able to provide helpful failure messages when our test fails like:
 
 ```bash
-FAILURE tests/examples/test_side_effects_example.py:34 - 
-left=Hello, Dave
-right=Hello, Dabe
+FAILURE tests/examples/test_side_effects_example.py:34 - Side-effect '_.patches['sys.stdout'].getvalue() == 'Hello, Dabe\n'' failed because: _.patches['sys.stdout'].getvalue() == Hello, Dave, and Hello, Dave != Hello, Dabe
 ```
 
 This error would occur if we incorrectly expected the patch to return `Hello, Dabe` in our side_effect à la 
@@ -97,7 +95,7 @@ This error would occur if we incorrectly expected the patch to return `Hello, Da
 lambda _: _.patches["sys.stdout"].getvalue() == "Hello, Dabe\n",
 ```
 
-Right now `side_effect` lambdas only support basic comparisons (`==`, `>=`, `<`, `!=`, etc).
+> **Note:** Right now `side_effect` lambdas support all comparison types (`==`, `!=`, `<`, `>`, `<=`, `>=`, `is`, `is not`, `in`, and `not in`), but currently sundew only supports 1 comparison per lamdbda. You can break up lambdas with multiple comparisons into multiple `side_effect` lambdas with a single comparison each.
 
 ## Setup
 `setup: set[Callable[[], _GeneratorContextManager[Any]]] | None = None`
