@@ -58,7 +58,3 @@ def run(
         ...
 
     test.run(function_name=function, enable_auto_test_writer=auto_test_writer)
-
-
-def main() -> Any:  # noqa: ANN401
-    return app()
