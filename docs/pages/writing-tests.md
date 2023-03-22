@@ -1,7 +1,12 @@
 # Writing Tests
 
 ## Directory Structure
-Tests are typically written in python files within a `tests` directory at the root of your project. You can have many files within that directory and can use sub-directories to organize those files to your liking. Sundew is not very opinionated about subdirectories, or how the test files are named so feel free to structure this directory how you'd like. 
+Tests _must_ be written in python files within a `tests` directory at the root of your project. You can have many files within that directory and can use sub-directories to organize those files to your liking. Sundew is not very opinionated about subdirectories, or how the test files are named so feel free to structure this directory how you'd like. 
+
+Your code may either be:
+- Structured as a module, adjacent to the `test` directory
+- Stored as a single script, adjacent to the `test` directory
+- Stored as a script in a common directory such as `src` (name does not matter), adjacent to the `test` directory (This is the least recommended approach as it breaks most IDE's ability to find your code when you import it, but sundew will still attempt to dsearch and find these imports when running tests)
 
 
 ## Imports
