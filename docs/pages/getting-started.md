@@ -29,7 +29,7 @@ If you are excited about trying something brand new and are willing to except th
 Sundew is both a module for writing tests, and a CLI for running them. Once you're ready to get started you can easily install sundew by adding it to your pyproject.toml and/or by running:
 
 ```pip
-pip install -U sundew
+pip install --user sundew
 ```
 or
 ```poetry
