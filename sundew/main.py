@@ -5,6 +5,7 @@ import os
 import sys
 from importlib.machinery import ModuleSpec
 from pathlib import Path
+from typing import Optional
 
 import typer
 
@@ -36,7 +37,7 @@ def run(  # noqa: C901
         @classmethod
         def find_spec(
             cls, name: str, path, target=None  # noqa: all
-        ) -> ModuleSpec | None:
+        ) -> Optional[ModuleSpec]:
             module_path = module
             # Back up until we get to the root of the project directory
             while "tests" in str(module_path):
