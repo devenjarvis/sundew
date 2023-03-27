@@ -1,11 +1,13 @@
 import ast
-import asyncio
 import importlib
 import inspect
 import os
 import sys
 from collections.abc import Callable, Coroutine
-from contextlib import ExitStack, _GeneratorContextManager
+from contextlib import (
+    AsyncExitStack,
+    _GeneratorContextManager,
+)
 from functools import wraps
 from typing import Any, Optional, Union
 from unittest.mock import patch
@@ -116,17 +118,20 @@ def test(fn: Callable) -> Callable:
     return add_test
 
 
-def apply_patches(test: FunctionTest, stack: ExitStack) -> None:
+def apply_patches(test: FunctionTest, stack: AsyncExitStack) -> None:
     if test.patches:
         for target, new in test.patches.items():
             stack.enter_context(patch(target, new))
 
 
-def apply_fixtures(test: FunctionTest, stack: ExitStack) -> dict[str, Any]:
+async def apply_fixtures(test: FunctionTest, stack: AsyncExitStack) -> dict[str, Any]:
     fixture_yields = {}
     if test.setup:
         for fixture in test.setup:
-            fixture_yield: Any = stack.enter_context(fixture())
+            if inspect.isasyncgenfunction(inspect.unwrap(fixture)):  # async fixture
+                fixture_yield: Any = await stack.enter_async_context(fixture())
+            else:  # normal fixture
+                fixture_yield: Any = stack.enter_context(fixture())
             fixture_yields[fixture.__name__] = fixture_yield
 
     return fixture_yields
@@ -154,14 +159,14 @@ def copy_function_inputs(test: FunctionTest) -> dict[str, Any]:
     return isolated_inputs
 
 
-def run_function(
+async def run_function(
     test: FunctionTest, isolated_input: dict[str, Any]
 ) -> Any:  # noqa: ANN401
     if test.cache and config.cache.contains(test.function, test.kwargs):
         return config.cache.get_cached_value(test.function, test.kwargs)
 
     if inspect.iscoroutinefunction(test.function):
-        return asyncio.run(test.function(**isolated_input))
+        return await test.function(**isolated_input)
     return test.function(**isolated_input)
 
 
@@ -233,9 +238,9 @@ def check_test_side_effects(
             exec(side_effect_code)  # noqa: S102
 
 
-def run_test(
+async def run_test(
     test: FunctionTest,
-    stack: ExitStack,
+    stack: AsyncExitStack,
     tests_ran: TaskID,
     progress: Progress,
     enable_auto_test_writer: bool,  # noqa: FBT001
@@ -244,7 +249,7 @@ def run_test(
         # programmatically apply any patches defined
         apply_patches(test, stack)
         # programmatically apply any fixtures setup
-        apply_fixtures(test, stack)
+        await apply_fixtures(test, stack)
         try:
             # Isolate input arguments
             isolated_input = copy_function_inputs(test)
@@ -335,7 +340,9 @@ def detect_missing_tests(selected_functions: list[str]) -> list[str]:
     return missing_tests
 
 
-def run(function_name: str, enable_auto_test_writer: bool) -> None:  # noqa: FBT001
+async def run(
+    function_name: str, enable_auto_test_writer: bool
+) -> None:
     with Progress(
         TextColumn("{task.description}"),
         BarColumn(),
@@ -363,5 +370,7 @@ def run(function_name: str, enable_auto_test_writer: bool) -> None:  # noqa: FBT
 
         # Run all selected tests
         for test in sorted_tests:
-            with ExitStack() as stack:
-                run_test(test, stack, tests_ran, progress, enable_auto_test_writer)
+            async with AsyncExitStack() as stack:
+                await run_test(
+                    test, stack, tests_ran, progress, enable_auto_test_writer
+                )

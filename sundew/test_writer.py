@@ -1,6 +1,6 @@
 import inspect
 from collections.abc import Callable
-from contextlib import ExitStack
+from contextlib import AsyncExitStack
 from pathlib import Path
 from typing import Any
 from unittest.mock import patch
@@ -49,7 +49,7 @@ class DependentFunctionSpy:
 
 
 def mock_function_dependencies(
-    fn: Callable, stack: ExitStack
+    fn: Callable, stack: AsyncExitStack
 ) -> dict[str, DependentFunctionSpy]:
     mocks: dict[str, DependentFunctionSpy] = {}
     for dep_func_simple_name in config.test_graph.functions[fn.__name__].deps:

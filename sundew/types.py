@@ -1,6 +1,6 @@
 import inspect
-from collections.abc import Callable
-from contextlib import _GeneratorContextManager
+from collections.abc import Callable, Coroutine
+from contextlib import _AsyncGeneratorContextManager, _GeneratorContextManager
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Optional
@@ -32,7 +32,10 @@ class FunctionTest:
     kwargs: dict[str, Any] = field(default_factory=dict)
     patches: dict[str, Any] = field(default_factory=dict)
     returns: Optional[Any] = None
-    setup: set[Callable[[], _GeneratorContextManager[Any]]] = field(default_factory=set)
+    setup: set[
+        Callable[[], _GeneratorContextManager[Any]],
+        Coroutine[_AsyncGeneratorContextManager[Any]],
+    ] = field(default_factory=set)
     side_effects: list[Callable[[Any], bool]] = field(default_factory=list)
 
     @property
