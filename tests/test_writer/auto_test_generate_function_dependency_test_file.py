@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from sundew.test import test
+from sundew import test
 from sundew.test_writer import (
     build_file_path,
     build_import_string,

@@ -22,6 +22,10 @@ mypy = "*"
 ruff = "*"
 poethepoet = "*"
 types-cachetools = "*"
+fastapi = "^0.95.0"
+databases = "^0.7.0"
+uvicorn = "^0.21.1"
+aiosqlite = "^0.18.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -43,3 +47,7 @@ line-length = 100
 select = ["ALL"]
 ignore = ["D", "T", "ISC", "S101", "ANN101", "COM812", "TCH003", "PLR0913", "UP007", "UP038"]
 
+[tool.mypy]
+    [[tool.mypy.overrides]]
+    module = 'sqlalchemy'
+    ignore_missing_imports = true

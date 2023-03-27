@@ -1,7 +1,7 @@
 import io
 
 from examples.examples import simple_example
-from sundew.test import test
+from sundew import test
 
 test(simple_example.quadratic)(
     kwargs={"a": 1, "b": -8, "c": 5},

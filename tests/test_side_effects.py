@@ -1,7 +1,6 @@
 import ast
 
-from sundew import side_effects
-from sundew.test import test
+from sundew import side_effects, test
 
 test(side_effects.ConvertSideEffect.visit)(
     kwargs={

@@ -5,7 +5,7 @@ from examples.examples.simple_example import (
     square,
     square_root,
 )
-from sundew.test import test
+from sundew import test
 
 test(divide)(
     cache=True,
