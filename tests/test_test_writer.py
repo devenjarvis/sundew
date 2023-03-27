@@ -3,8 +3,7 @@ from contextlib import ExitStack
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from sundew import test_writer
-from sundew.test import test
+from sundew import test, test_writer
 from tests import fixtures
 
 test(test_writer.mock_function_dependencies)(

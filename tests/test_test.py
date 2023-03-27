@@ -1,5 +1,5 @@
-from sundew import test as sundew_test
-from sundew.test import test
+from sundew import test
+from sundew import test_runner as sundew_test
 from tests import fixtures
 
 # test(sundew_test.update_test_graph)(

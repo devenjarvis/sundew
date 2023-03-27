@@ -1,7 +1,7 @@
 import io
 
 from examples.examples import side_effects_example
-from sundew.test import test
+from sundew import test
 
 test(side_effects_example.concatenate)(
     kwargs={"a": "123", "b": "456"},

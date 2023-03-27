@@ -9,7 +9,7 @@ from typing import Optional
 
 import typer
 
-from sundew import test
+from sundew import test_runner
 from sundew.config import config
 
 app = typer.Typer()
@@ -66,16 +66,17 @@ def run(  # noqa: C901
     # Import user's code from tests
     sys.meta_path.append(ModuleFinder)
 
+    # Load test files in provided path
     if module.is_dir():
         for dirpath, _, fnames in os.walk(module):
             for f in fnames:
                 if f.endswith(".py"):
                     if spec := importlib.util.spec_from_file_location(
-                        "module.name",
+                        f[:-3],
                         Path(dirpath) / f,
                     ):
                         imported_module = importlib.util.module_from_spec(spec)
-                        sys.modules["module.name"] = imported_module
+                        sys.modules[f[:-3]] = imported_module
                         if spec.loader:
                             spec.loader.exec_module(imported_module)
                         else:
@@ -92,4 +93,4 @@ def run(  # noqa: C901
     else:
         ...
 
-    test.run(function_name=function, enable_auto_test_writer=auto_test_writer)
+    test_runner.run(function_name=function, enable_auto_test_writer=auto_test_writer)

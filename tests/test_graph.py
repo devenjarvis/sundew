@@ -1,5 +1,5 @@
+from sundew import test
 from sundew.graph import Graph
-from sundew.test import test
 from sundew.types import Function
 from tests.fixtures import callee_func, dependent_func
 
