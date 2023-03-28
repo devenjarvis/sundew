@@ -270,7 +270,7 @@ async def run_test(
             mocks = mock_function_dependencies(test.function, stack)
 
             # Run the test function once for evaluation
-            actual_return = run_function(test, isolated_input)
+            actual_return = await run_function(test, isolated_input)
 
             if enable_auto_test_writer:
                 # Write tests with mock data
