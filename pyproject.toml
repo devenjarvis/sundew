@@ -44,9 +44,10 @@ type = "mypy ."
 
 
 [tool.ruff]
+target-version = "py39"
 line-length = 100
 select = ["ALL"]
-ignore = ["D", "T", "ISC", "S101", "ANN101", "COM812", "TCH003", "PLR0913", "UP007", "UP038"]
+ignore = ["D", "T", "ISC", "S101", "ANN101", "COM812", "TCH003", "PLR0913"]
 
 [tool.mypy]
     [[tool.mypy.overrides]]

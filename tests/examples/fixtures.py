@@ -1,4 +1,4 @@
-from collections.abc import Iterator
+from collections.abc import AsyncIterator, Iterator
 from contextlib import asynccontextmanager, contextmanager
 from pathlib import Path
 
@@ -24,7 +24,7 @@ def test_sqlite_db() -> Iterator:
 
 
 @asynccontextmanager
-async def test_client() -> Iterator:
+async def test_client() -> AsyncIterator:
     async with AsyncClient(
         app=fastapi_example.app, base_url="http://test"
     ) as test_client:

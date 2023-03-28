@@ -6,6 +6,7 @@ import sys
 from collections.abc import Callable, Coroutine
 from contextlib import (
     AsyncExitStack,
+    _AsyncGeneratorContextManager,
     _GeneratorContextManager,
 )
 from functools import wraps
@@ -92,7 +93,17 @@ def get_test_function(fn: Callable) -> Callable:
 def test(fn: Callable) -> Callable:
     def add_test(
         cache: bool = False,  # noqa: FBT
-        setup: Optional[set[Callable[[], _GeneratorContextManager[Any]]]] = None,
+        setup: Optional[
+            set[
+                Callable[
+                    [],
+                    Union[
+                        _GeneratorContextManager[Any],
+                        _AsyncGeneratorContextManager[Any],
+                    ],
+                ]
+            ]
+        ] = None,
         kwargs: Optional[dict[str, Any]] = None,
         returns: Union[Any, Exception, None] = None,
         patches: Optional[dict[str, Any]] = None,
@@ -128,10 +139,11 @@ async def apply_fixtures(test: FunctionTest, stack: AsyncExitStack) -> dict[str,
     fixture_yields = {}
     if test.setup:
         for fixture in test.setup:
+            fixture_yield: Any
             if inspect.isasyncgenfunction(inspect.unwrap(fixture)):  # async fixture
-                fixture_yield: Any = await stack.enter_async_context(fixture())
+                fixture_yield = await stack.enter_async_context(fixture())  # type: ignore[arg-type]
             else:  # normal fixture
-                fixture_yield: Any = stack.enter_context(fixture())
+                fixture_yield = stack.enter_context(fixture())  # type: ignore[arg-type]
             fixture_yields[fixture.__name__] = fixture_yield
 
     return fixture_yields
@@ -341,7 +353,7 @@ def detect_missing_tests(selected_functions: list[str]) -> list[str]:
 
 
 async def run(
-    function_name: str, enable_auto_test_writer: bool
+    function_name: str, enable_auto_test_writer: bool  # noqa: FBT001
 ) -> None:
     with Progress(
         TextColumn("{task.description}"),
