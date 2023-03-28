@@ -5,6 +5,10 @@ description = ""
 authors = ["devenjarvis <devenjarvis@gmail.com>"]
 readme = "README.md"
 license = "MIT"
+repository = "https://github.com/devenjarvis/sundew"
+documentation = "https://devenjarvis.github.io/sundew/#/"
+keywords = ["testing"]
+classifiers = ["Topic :: Software Development :: Testing"]
 
 [tool.poetry.dependencies]
 black = "*"
