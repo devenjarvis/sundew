@@ -3,13 +3,12 @@ import importlib
 import inspect
 import os
 import sys
-from collections.abc import Callable, Coroutine
+from collections.abc import Callable
 from contextlib import (
     AsyncExitStack,
     _AsyncGeneratorContextManager,
     _GeneratorContextManager,
 )
-from functools import wraps
 from typing import Any, Optional, Union
 from unittest.mock import patch
 
@@ -66,31 +65,7 @@ def update_test_graph(fn: Callable) -> None:
             print("Not sure how we get here yet.")
 
 
-def get_test_function(fn: Callable) -> Callable:
-    @wraps(fn)
-    def sundew_test_wrapper(
-        *args: tuple[Any, ...],
-        **kwargs: dict[str, Any],
-    ) -> Callable:
-        return fn(*args, **kwargs)
-
-    @wraps(fn)
-    async def async_sundew_test_wrapper(
-        *args: tuple[Any, ...],
-        **kwargs: dict[str, Any],
-    ) -> Coroutine:
-        return await fn(*args, **kwargs)
-
-    if inspect.iscoroutinefunction(fn):
-        async_sundew_test_wrapper.__signature__ = inspect.signature(  # type: ignore[attr-defined]
-            fn
-        )
-        return async_sundew_test_wrapper
-    sundew_test_wrapper.__signature__ = inspect.signature(fn)  # type: ignore[attr-defined]
-    return sundew_test_wrapper
-
-
-def test(fn: Callable) -> Callable:
+def test(fn: Callable, proxy_fn: Union[Callable, None] = None) -> Callable:
     def add_test(
         cache: bool = False,  # noqa: FBT
         setup: Optional[
@@ -109,11 +84,12 @@ def test(fn: Callable) -> Callable:
         patches: Optional[dict[str, Any]] = None,
         side_effects: Optional[list[Callable]] = None,
     ) -> Callable:
-        update_test_graph(fn)
+        update_test_graph(proxy_fn or fn)
 
         config.test_graph.add_test(
             FunctionTest(
-                function=get_test_function(fn),
+                function=proxy_fn or fn,
+                proxy_function=proxy_fn,
                 kwargs=kwargs or {},
                 cache=cache,
                 location=f"{os.path.relpath(inspect.stack()[1][1])}:{inspect.stack()[1][2]}",
@@ -203,9 +179,9 @@ def check_test_output(test: FunctionTest, actual_return: Any) -> None:  # noqa: 
     #     assert actual_return.__code__.co_code == test.returns.__code__.co_code, (
     else:
         assert actual_return == test.returns, (
-            f"Input {test.kwargs} returned {actual_return} "
+            f"Input {test.kwargs} returned {repr(actual_return)} "
             + "which does not match the expected return of "
-            + f"{test.returns}"
+            + f"{repr(test.returns)}"
         )
 
 

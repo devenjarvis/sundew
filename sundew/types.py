@@ -27,6 +27,7 @@ class FunctionName:
 @dataclass(eq=True)
 class FunctionTest:
     function: Callable
+    proxy_function: Union[Callable, None] = None
     location: str = ""
     cache: bool = False
     kwargs: dict[str, Any] = field(default_factory=dict)
