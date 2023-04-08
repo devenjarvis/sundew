@@ -7,7 +7,7 @@ import httpx
 
 class AsyncTestClient(httpx.AsyncClient):
     def post_req(self, endpoint: str) -> Callable:
-        new_func = partial(self.post, url=endpoint)
+        new_func = partial(super().post, url=endpoint)
         new_func.__name__ = self.post_req.__name__
         new_func.__code__ = self.post.__code__
         new_func.__qualname__ = self.post_req.__qualname__
@@ -16,18 +16,23 @@ class AsyncTestClient(httpx.AsyncClient):
 
 
 class TestClient(httpx.Client):
-    def post(self, endpoint: str) -> Callable:
-        return partial(httpx.Client.post, url=endpoint)
+    def post_req(self, endpoint: str) -> Callable:
+        new_func = partial(super().post, url=endpoint)
+        new_func.__name__ = self.post_req.__name__
+        new_func.__code__ = self.post.__code__
+        new_func.__qualname__ = self.post_req.__qualname__
+        new_func.__module__ = self.post_req.__module__
+        return new_func
 
 
 class TestResponse(httpx.Response):
     def __init__(self, *args: tuple[Any, ...], **kwargs: dict[str, Any]) -> None:
         # Call httpx.Respone __init__
         super().__init__(*args, **kwargs)
-        # Unset headers if user didn't ask for them
+        # Unset headers if user didn't ask for it
         if not kwargs.get("headers", None):
             self.headers = None
-        # Unset stream if user didn't ask for them
+        # Unset stream if user didn't ask for it
         if not kwargs.get("stream", None):
             self.stream = None
 
