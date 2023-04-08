@@ -2,56 +2,19 @@ import inspect
 from collections.abc import Callable
 from contextlib import AsyncExitStack
 from pathlib import Path
-from typing import Any
 from unittest.mock import patch
 
 import black
 
 from sundew.config import config
 from sundew.types import FunctionTest
-
-
-class DependentFunctionSpy:
-    def __init__(self, func: Callable) -> None:
-        self.func = func
-        self.calls: set[FunctionTest] = set()
-        self.__name__ = func.__name__
-        self.__qualname__ = func.__qualname__
-
-    def __call__(
-        self, *args: tuple[Any, ...], **kwargs: dict[str, Any]
-    ) -> Any:  # noqa: ANN401
-        generated_kwargs = inspect.getcallargs(self.func, *args, **kwargs)
-
-        # Check cache
-        if config.cache.contains(self.func, generated_kwargs):
-            return config.cache.get_cached_value(self.func, generated_kwargs)
-
-        answer = self.func(*args, **kwargs)
-        function_test = FunctionTest(
-            function=self.func,
-            kwargs=generated_kwargs,
-            returns=answer,
-            cache=True,
-        )
-        self.calls.add(function_test)
-        return answer
-
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, DependentFunctionSpy):
-            # don't attempt to compare against unrelated types
-            return NotImplemented
-
-        return (
-            self.func.__code__.co_code == other.func.__code__.co_code
-            and self.calls == other.calls
-        )
+from sundew.utils import FunctionSpy
 
 
 def mock_function_dependencies(
     fn: Callable, stack: AsyncExitStack
-) -> dict[str, DependentFunctionSpy]:
-    mocks: dict[str, DependentFunctionSpy] = {}
+) -> dict[str, FunctionSpy]:
+    mocks: dict[str, FunctionSpy] = {}
     for dep_func_simple_name in config.test_graph.functions[fn.__name__].deps:
         dep_func = config.test_graph.functions[dep_func_simple_name]
         # Recursively mock sub-dependent functions
@@ -64,7 +27,7 @@ def mock_function_dependencies(
         mocks[dep_func_simple_name] = stack.enter_context(
             patch(
                 dep_func.name.qualified,
-                DependentFunctionSpy(dep_func.declaration),
+                FunctionSpy(dep_func.declaration),
             )
         )
     return mocks
@@ -204,7 +167,7 @@ def build_file_path(fn: Callable) -> Path:
 
 
 def generate_function_dependency_test_file(
-    fn: Callable, mocks: dict[str, DependentFunctionSpy]
+    fn: Callable, mocks: dict[str, FunctionSpy]
 ) -> None:
     generated_test_file_imports = set()
     mock_calls: set[FunctionTest] = set()
