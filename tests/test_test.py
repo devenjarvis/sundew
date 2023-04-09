@@ -1,6 +1,9 @@
+from contextlib import AsyncExitStack
+
+import fixtures
+
 from sundew import test
 from sundew import test_runner as sundew_test
-from tests import fixtures
 
 # test(sundew_test.update_test_graph)(
 #   Not isolated, stopping here...
@@ -26,6 +29,7 @@ test(sundew_test.run_function)(
     kwargs={
         "test": fixtures.passing_function_test,
         "isolated_input": {"a": 1, "b": "2"},
+        "stack": AsyncExitStack(),
     },
     returns="21",
 )

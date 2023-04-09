@@ -3,9 +3,8 @@ from contextlib import asynccontextmanager, contextmanager
 from pathlib import Path
 
 import databases
+from app import main
 from httpx import AsyncClient
-
-from examples.examples import fastapi_example
 
 
 @contextmanager
@@ -25,7 +24,5 @@ def test_sqlite_db() -> Iterator:
 
 @asynccontextmanager
 async def test_client() -> AsyncIterator:
-    async with AsyncClient(
-        app=fastapi_example.app, base_url="http://test"
-    ) as test_client:
+    async with AsyncClient(app=main.app, base_url="http://test") as test_client:
         yield test_client

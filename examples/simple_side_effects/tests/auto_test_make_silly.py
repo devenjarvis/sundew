@@ -1,4 +1,5 @@
-from examples.examples.side_effects_example import concatenate, reverse
+from main import concatenate, reverse
+
 from sundew import test
 
 test(concatenate)(

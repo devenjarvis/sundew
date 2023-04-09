@@ -10,7 +10,7 @@ from contextlib import (
     _GeneratorContextManager,
 )
 from typing import Any, Optional, Union
-from unittest.mock import patch, AsyncMock
+from unittest.mock import AsyncMock, patch
 
 from pydantic import BaseConfig, BaseModel, create_model
 from rich import print
@@ -22,7 +22,6 @@ from rich.progress import (
     TextColumn,
     TimeElapsedColumn,
 )
-from examples.examples import fastapi_example
 
 from sundew.config import config
 from sundew.side_effects import ConvertSideEffect, get_source
@@ -31,7 +30,6 @@ from sundew.test_writer import (
     mock_function_dependencies,
 )
 from sundew.types import Function, FunctionTest
-from sundew.utils import FunctionSpy, AsyncFunctionSpy
 
 
 def update_test_graph(fn: Callable) -> None:
@@ -138,7 +136,6 @@ async def apply_fixtures(test: FunctionTest, stack: AsyncExitStack) -> dict[str,
 def copy_function_inputs(test: FunctionTest) -> dict[str, Any]:
     function_under_test = test.proxy_function or test.function
     isolated_inputs: dict[str, Any] = {}
-    print(function_under_test)
     signature = inspect.signature(function_under_test)
     isolated_inputs = {
         k: v.default
@@ -165,7 +162,6 @@ async def run_function(
     # Run proxy_function if it exists, else function
     function = test.proxy_function or test.function
     if test.proxy_function is not None:
-        print("Testing proxy function 1")
         mock = stack.enter_context(
             patch(test.name.qualified, AsyncMock(wraps=test.function))
         )
@@ -179,7 +175,6 @@ async def run_function(
         actual_return = function(**isolated_input)
 
     if test.proxy_function is not None:
-        print("Testing proxy function 2")
         mock.assert_awaited()
         # assert (
         #     mock.assert_awaited()

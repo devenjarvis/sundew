@@ -21,8 +21,10 @@ jobs:
           poetry-version: ${{ matrix.poetry-version }}
       - name: Install dependencies
         run: poetry install
-      - name: Run tests
+      - name: Run sundew tests
         run: poetry run poe test
+      - name: Run example tests
+        run: poetry run poe test_examples
   code-quality:
     strategy:
       fail-fast: false

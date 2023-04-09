@@ -1,7 +1,8 @@
-from examples.examples import async_example
+import main
+
 from sundew import test
 
-test(async_example.say_after)(
+test(main.say_after)(
     kwargs={"delay": 0.1, "what": "hello"},
     returns="hello",
 )

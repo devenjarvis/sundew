@@ -8,19 +8,12 @@ import sqlalchemy
 from fastapi import FastAPI
 from pydantic import BaseModel
 
+app = FastAPI()
+
 # Setup db
 DATABASE_URL = "sqlite:///./fastapi_example.db"
-
 database = databases.Database(DATABASE_URL)
 metadata = sqlalchemy.MetaData()
-
-notes = sqlalchemy.Table(
-    "notes",
-    metadata,
-    sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True),
-    sqlalchemy.Column("text", sqlalchemy.String),
-    sqlalchemy.Column("completed", sqlalchemy.Boolean),
-)
 
 engine = sqlalchemy.create_engine(
     DATABASE_URL, connect_args={"check_same_thread": False}
@@ -38,10 +31,6 @@ class Note(BaseModel):
     id: int  # noqa: A003
     text: str
     completed: bool
-
-
-# FastAPI Endpoints
-app = FastAPI()
 
 
 @app.on_event("startup")

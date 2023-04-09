@@ -16,7 +16,6 @@ class FunctionSpy:
     def __call__(
         self, *args: tuple[Any, ...], **kwargs: dict[str, Any]
     ) -> Any:  # noqa: ANN401
-        print("called")
         generated_kwargs = inspect.getcallargs(self.func, *args, **kwargs)
 
         # Check cache
