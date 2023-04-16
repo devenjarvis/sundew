@@ -198,7 +198,6 @@ def check_test_output(test: FunctionTest, actual_return: Any) -> None:  # noqa: 
             + "which does not match the expected AST for "
             + f"{ast.unparse(test.returns).strip()}"
         )
-    #     assert actual_return.__code__.co_code == test.returns.__code__.co_code, (
     else:
         assert actual_return == test.returns, (
             f"Input {test.kwargs} returned {repr(actual_return)} "

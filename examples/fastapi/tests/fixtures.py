@@ -1,4 +1,4 @@
-from collections.abc import Iterator
+from collections.abc import AsyncIterator, Iterator
 from contextlib import asynccontextmanager, contextmanager
 from pathlib import Path
 
@@ -32,7 +32,7 @@ def test_sqlite_db() -> Iterator:
 
 
 @asynccontextmanager
-async def add_sample_notes() -> Iterator:
+async def add_sample_notes() -> AsyncIterator:
     try:
         # Add 3 rows
         await main.create_note(note=main.NoteIn(text="test", completed=False))
