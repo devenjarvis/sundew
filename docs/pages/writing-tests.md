@@ -132,7 +132,7 @@ test(test_writer.mock_function_dependencies)(
     setup={fixtures.extend_config_with_dependent_functions},
     kwargs={"fn": fixtures.callee_func, "stack": ExitStack()},
     returns={
-        "dependent_func": test_writer.DependentFunctionSpy(fixtures.dependent_func)
+        "dependent_func": utils.FunctionSpy(fixtures.dependent_func)
     },
 )
 ```

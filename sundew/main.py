@@ -1,3 +1,4 @@
+import asyncio
 import glob
 import importlib
 import importlib.util
@@ -93,4 +94,8 @@ def run(  # noqa: C901
     else:
         ...
 
-    test_runner.run(function_name=function, enable_auto_test_writer=auto_test_writer)
+    asyncio.run(
+        test_runner.run(
+            function_name=function, enable_auto_test_writer=auto_test_writer
+        )
+    )

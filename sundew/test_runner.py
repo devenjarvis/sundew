@@ -1,14 +1,16 @@
 import ast
-import asyncio
 import importlib
 import inspect
 import os
 import sys
-from collections.abc import Callable, Coroutine
-from contextlib import ExitStack, _GeneratorContextManager
-from functools import wraps
+from collections.abc import Callable
+from contextlib import (
+    AsyncExitStack,
+    _AsyncGeneratorContextManager,
+    _GeneratorContextManager,
+)
 from typing import Any, Optional, Union
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 
 from pydantic import BaseConfig, BaseModel, create_model
 from rich import print
@@ -63,34 +65,20 @@ def update_test_graph(fn: Callable) -> None:
             print("Not sure how we get here yet.")
 
 
-def get_test_function(fn: Callable) -> Callable:
-    @wraps(fn)
-    def sundew_test_wrapper(
-        *args: tuple[Any, ...],
-        **kwargs: dict[str, Any],
-    ) -> Callable:
-        return fn(*args, **kwargs)
-
-    @wraps(fn)
-    async def async_sundew_test_wrapper(
-        *args: tuple[Any, ...],
-        **kwargs: dict[str, Any],
-    ) -> Coroutine:
-        return await fn(*args, **kwargs)
-
-    if inspect.iscoroutinefunction(fn):
-        async_sundew_test_wrapper.__signature__ = inspect.signature(  # type: ignore[attr-defined]
-            fn
-        )
-        return async_sundew_test_wrapper
-    sundew_test_wrapper.__signature__ = inspect.signature(fn)  # type: ignore[attr-defined]
-    return sundew_test_wrapper
-
-
-def test(fn: Callable) -> Callable:
+def test(fn: Callable, proxy_fn: Union[Callable, None] = None) -> Callable:
     def add_test(
         cache: bool = False,  # noqa: FBT
-        setup: Optional[set[Callable[[], _GeneratorContextManager[Any]]]] = None,
+        setup: Optional[
+            set[
+                Callable[
+                    [],
+                    Union[
+                        _GeneratorContextManager[Any],
+                        _AsyncGeneratorContextManager[Any],
+                    ],
+                ]
+            ]
+        ] = None,
         kwargs: Optional[dict[str, Any]] = None,
         returns: Union[Any, Exception, None] = None,
         patches: Optional[dict[str, Any]] = None,
@@ -100,7 +88,8 @@ def test(fn: Callable) -> Callable:
 
         config.test_graph.add_test(
             FunctionTest(
-                function=get_test_function(fn),
+                function=fn,
+                proxy_function=proxy_fn,
                 kwargs=kwargs or {},
                 cache=cache,
                 location=f"{os.path.relpath(inspect.stack()[1][1])}:{inspect.stack()[1][2]}",
@@ -116,25 +105,38 @@ def test(fn: Callable) -> Callable:
     return add_test
 
 
-def apply_patches(test: FunctionTest, stack: ExitStack) -> None:
+async def apply_patches(test: FunctionTest, stack: AsyncExitStack) -> None:
     if test.patches:
         for target, new in test.patches.items():
-            stack.enter_context(patch(target, new))
+            # If we are patching with a yield fixture, apply it
+            if inspect.isgeneratorfunction(inspect.unwrap(new)):
+                patch_fixture = stack.enter_context(new())
+                stack.enter_context(patch(target, patch_fixture))
+            elif inspect.isasyncgenfunction(inspect.unwrap(new)):
+                patch_fixture = await stack.enter_async_context(new())
+                stack.enter_context(patch(target, patch_fixture))
+            else:
+                stack.enter_context(patch(target, new))
 
 
-def apply_fixtures(test: FunctionTest, stack: ExitStack) -> dict[str, Any]:
+async def apply_fixtures(test: FunctionTest, stack: AsyncExitStack) -> dict[str, Any]:
     fixture_yields = {}
     if test.setup:
         for fixture in test.setup:
-            fixture_yield: Any = stack.enter_context(fixture())
+            fixture_yield: Any
+            if inspect.isasyncgenfunction(inspect.unwrap(fixture)):  # async fixture
+                fixture_yield = await stack.enter_async_context(fixture())  # type: ignore[arg-type]
+            else:  # normal fixture
+                fixture_yield = stack.enter_context(fixture())  # type: ignore[arg-type]
             fixture_yields[fixture.__name__] = fixture_yield
 
     return fixture_yields
 
 
 def copy_function_inputs(test: FunctionTest) -> dict[str, Any]:
+    function_under_test = test.proxy_function or test.function
     isolated_inputs: dict[str, Any] = {}
-    signature = inspect.signature(test.function)
+    signature = inspect.signature(function_under_test)
     isolated_inputs = {
         k: v.default
         for k, v in signature.parameters.items()
@@ -154,21 +156,34 @@ def copy_function_inputs(test: FunctionTest) -> dict[str, Any]:
     return isolated_inputs
 
 
-def run_function(
-    test: FunctionTest, isolated_input: dict[str, Any]
+async def run_function(
+    test: FunctionTest, isolated_input: dict[str, Any], stack: AsyncExitStack
 ) -> Any:  # noqa: ANN401
-    if test.cache and config.cache.contains(test.function, test.kwargs):
-        return config.cache.get_cached_value(test.function, test.kwargs)
+    # Run proxy_function if it exists, else function
+    function = test.proxy_function or test.function
+    if test.proxy_function is not None:
+        mock = stack.enter_context(
+            patch(test.name.qualified, AsyncMock(wraps=test.function))
+        )
+    if test.cache and config.cache.contains(function, test.kwargs):
+        return config.cache.get_cached_value(function, test.kwargs)
 
-    if inspect.iscoroutinefunction(test.function):
-        return asyncio.run(test.function(**isolated_input))
-    return test.function(**isolated_input)
+    # Call function
+    if inspect.iscoroutinefunction(function):
+        actual_return = await function(**isolated_input)
+    else:
+        actual_return = function(**isolated_input)
+
+    if test.proxy_function is not None:
+        mock.assert_awaited()
+
+    return actual_return
 
 
 def check_test_exception(test: FunctionTest, e: Exception) -> None:
     # If we get an exception, check to see if it was expected
-    if test.returns:
-        assert isinstance(e, test.returns)
+    if test.returns is not None and isinstance(test.returns, Exception):
+        assert isinstance(e, test.returns.__class__)
     else:
         raise e
 
@@ -183,12 +198,11 @@ def check_test_output(test: FunctionTest, actual_return: Any) -> None:  # noqa: 
             + "which does not match the expected AST for "
             + f"{ast.unparse(test.returns).strip()}"
         )
-    #     assert actual_return.__code__.co_code == test.returns.__code__.co_code, (
     else:
         assert actual_return == test.returns, (
-            f"Input {test.kwargs} returned {actual_return} "
+            f"Input {test.kwargs} returned {repr(actual_return)} "
             + "which does not match the expected return of "
-            + f"{test.returns}"
+            + f"{repr(test.returns)}"
         )
 
 
@@ -233,18 +247,18 @@ def check_test_side_effects(
             exec(side_effect_code)  # noqa: S102
 
 
-def run_test(
+async def run_test(
     test: FunctionTest,
-    stack: ExitStack,
+    stack: AsyncExitStack,
     tests_ran: TaskID,
     progress: Progress,
     enable_auto_test_writer: bool,  # noqa: FBT001
 ) -> None:
     try:
         # programmatically apply any patches defined
-        apply_patches(test, stack)
+        await apply_patches(test, stack)
         # programmatically apply any fixtures setup
-        apply_fixtures(test, stack)
+        await apply_fixtures(test, stack)
         try:
             # Isolate input arguments
             isolated_input = copy_function_inputs(test)
@@ -253,7 +267,7 @@ def run_test(
             mocks = mock_function_dependencies(test.function, stack)
 
             # Run the test function once for evaluation
-            actual_return = run_function(test, isolated_input)
+            actual_return = await run_function(test, isolated_input, stack)
 
             if enable_auto_test_writer:
                 # Write tests with mock data
@@ -264,10 +278,11 @@ def run_test(
             check_test_exception(test, e)
         else:
             # If we didn't get an exception then check the output normally
-            if test.returns:
+            if test.returns is not None:
                 check_test_output(test, actual_return)
-        finally:
-            # Check if we have defined side effects
+
+        # Check if we have defined side effects
+        if test.side_effects is not None:
             check_test_side_effects(test, actual_return, isolated_input)
 
     except AssertionError as e:
@@ -335,7 +350,9 @@ def detect_missing_tests(selected_functions: list[str]) -> list[str]:
     return missing_tests
 
 
-def run(function_name: str, enable_auto_test_writer: bool) -> None:  # noqa: FBT001
+async def run(
+    function_name: str, enable_auto_test_writer: bool  # noqa: FBT001
+) -> None:
     with Progress(
         TextColumn("{task.description}"),
         BarColumn(),
@@ -363,5 +380,7 @@ def run(function_name: str, enable_auto_test_writer: bool) -> None:  # noqa: FBT
 
         # Run all selected tests
         for test in sorted_tests:
-            with ExitStack() as stack:
-                run_test(test, stack, tests_ran, progress, enable_auto_test_writer)
+            async with AsyncExitStack() as stack:
+                await run_test(
+                    test, stack, tests_ran, progress, enable_auto_test_writer
+                )

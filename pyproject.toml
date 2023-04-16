@@ -5,6 +5,13 @@ description = ""
 authors = ["devenjarvis <devenjarvis@gmail.com>"]
 readme = "README.md"
 license = "MIT"
+repository = "https://github.com/devenjarvis/sundew"
+documentation = "https://devenjarvis.github.io/sundew/#/"
+keywords = ["testing"]
+classifiers = ["Topic :: Software Development :: Testing"]
+
+[tool.poetry.scripts]
+sundew = "sundew.main:app"
 
 [tool.poetry.dependencies]
 black = "*"
@@ -13,19 +20,24 @@ python = "^3.9"
 pydantic = "^1.10.2"
 typer = {version = "^0.7.0", extras = ["all"]}
 poetry = "^1.4.0"
-
-[tool.poetry.scripts]
-sundew = "sundew.main:app"
+httpx = "^0.23.3"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "*"
 ruff = "*"
 poethepoet = "*"
 types-cachetools = "*"
+
+[tool.poetry.group.examples]
+optional = true
+
+[tool.poetry.group.examples.dependencies]
 fastapi = "^0.95.0"
-databases = "^0.7.0"
+databases = "^0.6.0"
 uvicorn = "^0.21.1"
 aiosqlite = "^0.18.0"
+alembic = "^1.10.3"
+ormar = "^0.12.1"
 
 [build-system]
 requires = ["poetry-core"]
@@ -39,13 +51,23 @@ format_check = "black . --check"
 lint = "ruff ."
 sundew = "sundew"
 test = "sundew ./tests"
-type = "mypy ."
+type = "mypy sundew"
+
+test_simple_async = "sundew ./examples/simple_async/tests"
+test_simple_example = "sundew ./examples/simple_example/tests"
+test_simple_side_effects = "sundew ./examples/simple_side_effects/tests"
+test_fastapi = "sundew ./examples/fastapi/tests"
+
+test_examples = ["test_simple_async", "test_simple_example", "test_simple_side_effects", "test_fastapi"]
+
 
 
 [tool.ruff]
+target-version = "py39"
 line-length = 100
 select = ["ALL"]
-ignore = ["D", "T", "ISC", "S101", "ANN101", "COM812", "TCH003", "PLR0913", "UP007", "UP038"]
+ignore = ["D", "T", "ISC", "S101", "ANN101", "COM812", "TCH003", "PLR0913", "INP001"]
+unfixable = ["ERA001"]
 
 [tool.mypy]
     [[tool.mypy.overrides]]
