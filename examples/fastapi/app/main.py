@@ -2,10 +2,10 @@
 # Source: https://fastapi.tiangolo.com/advanced/async-sql-databases/?h=sqlite
 
 
-from fastapi import FastAPI
+from app.db import Notes, database
 from pydantic import BaseModel
 
-from app.db import Notes, database
+from fastapi import FastAPI
 
 app = FastAPI()
 

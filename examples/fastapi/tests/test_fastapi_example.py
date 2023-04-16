@@ -1,10 +1,7 @@
 from app import db, main
 from fixtures import add_sample_notes, test_sqlite_db
 
-from sundew import AsyncTestClient, test
-
-client = AsyncTestClient(app=main.app, base_url="http://testserver")
-
+from sundew import test
 
 test(main.read_notes)(
     patches={"app.db.BaseMeta.database": test_sqlite_db},

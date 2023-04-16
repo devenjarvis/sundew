@@ -1,4 +1,4 @@
-from collections.abc import AsyncIterator, Iterator
+from collections.abc import Iterator
 from contextlib import asynccontextmanager, contextmanager
 from pathlib import Path
 
@@ -6,7 +6,6 @@ import databases
 from alembic import command
 from alembic.config import Config
 from app import main
-from httpx import AsyncClient
 
 
 @contextmanager
@@ -42,9 +41,3 @@ async def add_sample_notes() -> Iterator:
         yield
     finally:
         ...
-
-
-@asynccontextmanager
-async def test_client() -> AsyncIterator:
-    async with AsyncClient(app=main.app, base_url="http://test") as test_client:
-        yield test_client
