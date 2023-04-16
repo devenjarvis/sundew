@@ -56,7 +56,7 @@ test_examples = ["test_simple_async", "test_simple_example", "test_simple_side_e
 target-version = "py39"
 line-length = 100
 select = ["ALL"]
-ignore = ["D", "T", "ISC", "S101", "ANN101", "COM812", "TCH003", "PLR0913"]
+ignore = ["D", "T", "ISC", "S101", "ANN101", "COM812", "TCH003", "PLR0913", "INP001"]
 unfixable = ["ERA001"]
 
 [tool.mypy]

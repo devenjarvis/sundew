@@ -1,7 +1,6 @@
 # FastAPI Example
 # Source: https://fastapi.tiangolo.com/advanced/async-sql-databases/?h=sqlite
 
-from typing import Any
 
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -35,5 +34,5 @@ async def read_notes() -> list[Notes]:
 
 
 @app.post("/notes/", response_model=Notes)
-async def create_note(note: NoteIn) -> dict[str, Any]:
+async def create_note(note: NoteIn) -> Notes:
     return await Notes.objects.create(text=note.text, completed=note.completed)

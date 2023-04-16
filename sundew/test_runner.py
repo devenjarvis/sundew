@@ -176,9 +176,6 @@ async def run_function(
 
     if test.proxy_function is not None:
         mock.assert_awaited()
-        # assert (
-        #     mock.assert_awaited()
-        # ), f"Proxy function {test.proxy_function} never called {test.name.qualified}"
 
     return actual_return
 
