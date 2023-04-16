@@ -10,6 +10,9 @@ documentation = "https://devenjarvis.github.io/sundew/#/"
 keywords = ["testing"]
 classifiers = ["Topic :: Software Development :: Testing"]
 
+[tool.poetry.scripts]
+sundew = "sundew.main:app"
+
 [tool.poetry.dependencies]
 black = "*"
 cachetools = "*"
@@ -19,15 +22,22 @@ typer = {version = "^0.7.0", extras = ["all"]}
 poetry = "^1.4.0"
 httpx = "^0.23.3"
 
-[tool.poetry.scripts]
-sundew = "sundew.main:app"
-
 [tool.poetry.group.dev.dependencies]
 mypy = "*"
 ruff = "*"
 poethepoet = "*"
 types-cachetools = "*"
 
+[tool.poetry.group.examples]
+optional = true
+
+[tool.poetry.group.examples.dependencies]
+fastapi = "^0.95.0"
+databases = "^0.6.0"
+uvicorn = "^0.21.1"
+aiosqlite = "^0.18.0"
+alembic = "^1.10.3"
+ormar = "^0.12.1"
 
 [build-system]
 requires = ["poetry-core"]
