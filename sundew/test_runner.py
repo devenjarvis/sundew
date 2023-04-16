@@ -183,7 +183,7 @@ async def run_function(
 def check_test_exception(test: FunctionTest, e: Exception) -> None:
     # If we get an exception, check to see if it was expected
     if test.returns is not None and isinstance(test.returns, Exception):
-        assert isinstance(e, test.returns)
+        assert isinstance(e, test.returns.__class__)
     else:
         raise e
 

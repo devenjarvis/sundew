@@ -51,7 +51,7 @@ format_check = "black . --check"
 lint = "ruff ."
 sundew = "sundew"
 test = "sundew ./tests"
-type = "mypy ."
+type = "mypy sundew"
 
 test_simple_async = "sundew ./examples/simple_async/tests"
 test_simple_example = "sundew ./examples/simple_example/tests"
