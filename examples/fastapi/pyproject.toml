@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Example of using sundew to test applications using FastAPI"
 authors = ["devenjarvis <devenjarvis@gmail.com>"]
 readme = "README.md"
-packages = [{include = "fastapi_example"}]
+packages = [{include = "app"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
