@@ -10,6 +10,7 @@ python = "^3.9"
 boto3 = "^1.26.118"
 
 [tool.poetry.group.dev.dependencies]
+moto = "^4.1.7"
 sundew = {path = "../../", develop = true}
 poethepoet = "*"
 
