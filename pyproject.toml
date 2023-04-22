@@ -32,12 +32,7 @@ types-cachetools = "*"
 optional = true
 
 [tool.poetry.group.examples.dependencies]
-fastapi = "^0.95.0"
-databases = "^0.6.0"
-uvicorn = "^0.21.1"
-aiosqlite = "^0.18.0"
-alembic = "^1.10.3"
-ormar = "^0.12.1"
+fastapi-example = {path = "examples/fastapi", develop = true}
 
 [build-system]
 requires = ["poetry-core"]
