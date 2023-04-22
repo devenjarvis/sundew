@@ -1,18 +1,13 @@
 [tool.poetry]
-name = "fastapi-example"
+name = "boto3-example"
 version = "0.1.0"
-description = "Example of using sundew to test applications using FastAPI"
+description = "Example of using sundew to test applications using boto3"
 authors = ["devenjarvis <devenjarvis@gmail.com>"]
-packages = [{include = "app"}]
+packages = [{include = "example"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-fastapi = "^0.95.0"
-databases = "^0.6.0"
-uvicorn = "^0.21.1"
-aiosqlite = "^0.18.0"
-alembic = "^1.10.3"
-ormar = "^0.12.1"
+boto3 = "^1.26.118"
 
 [tool.poetry.group.dev.dependencies]
 sundew = {path = "../../", develop = true}
@@ -23,6 +18,4 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poe.tasks]
-run_migrations = "alembic upgrade head"
-run = "uvicorn app.main:app --reload"
 test = "sundew ./tests"
