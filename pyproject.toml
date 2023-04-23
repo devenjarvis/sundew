@@ -32,7 +32,7 @@ types-cachetools = "*"
 optional = true
 
 [tool.poetry.group.examples.dependencies]
-fastapi-example = {path = "examples/fastapi", develop = true}
+fastapi-example = {path = "examples/fastapi"}
 
 [build-system]
 requires = ["poetry-core"]

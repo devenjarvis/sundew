@@ -607,7 +607,7 @@ category = "dev"
 optional = false
 python-versions = "^3.9"
 files = []
-develop = true
+develop = false
 
 [package.dependencies]
 aiosqlite = "^0.18.0"
@@ -805,14 +805,14 @@ files = [
 
 [[package]]
 name = "importlib-metadata"
-version = "6.5.1"
+version = "6.6.0"
 description = "Read metadata from Python packages"
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "importlib_metadata-6.5.1-py3-none-any.whl", hash = "sha256:cd4687a8df60d9aefd424ed9364a8f29def203a9482ec8eb8e8070ef06075f89"},
-    {file = "importlib_metadata-6.5.1.tar.gz", hash = "sha256:b986d197242e4e9960a12743a6ec5a9fc8b3d7054612d90489452170785c98a5"},
+    {file = "importlib_metadata-6.6.0-py3-none-any.whl", hash = "sha256:43dd286a2cd8995d5eaef7fee2066340423b818ed3fd70adf0bad5f1fac53fed"},
+    {file = "importlib_metadata-6.6.0.tar.gz", hash = "sha256:92501cdf9cc66ebd3e612f1b4f0c0765dfa42f0fa38ffb319b6bd84dd675d705"},
 ]
 
 [package.dependencies]
@@ -1885,14 +1885,14 @@ files = [
 
 [[package]]
 name = "trove-classifiers"
-version = "2023.4.20"
+version = "2023.4.22"
 description = "Canonical source for classifiers on PyPI (pypi.org)."
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "trove-classifiers-2023.4.20.tar.gz", hash = "sha256:9fbc0db7e6f80471cd3b9fc29a63c10a19c16089b771c8ea87a005e92e8dc114"},
-    {file = "trove_classifiers-2023.4.20-py3-none-any.whl", hash = "sha256:9a29cdbf29bca9bf3b0ce6e02a9a8fb1c29a2660e47bb5d3cf713245185ac94f"},
+    {file = "trove-classifiers-2023.4.22.tar.gz", hash = "sha256:65e8cb3929e3788141db90a0776b76fcafbeb548a4fbe6aee4bfd9656e899939"},
+    {file = "trove_classifiers-2023.4.22-py3-none-any.whl", hash = "sha256:f8823bc4b002fb60ad102f1a97fbb0086efe149123f5701bcbae93d330321cca"},
 ]
 
 [[package]]
@@ -2137,4 +2137,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "b1bce242a82b2fa2475223f273c16a01311968cc9a01fd566b7776d0b058f4fe"
+content-hash = "869852b62647345262956210e6d0846e0d4ccb62665eda068624905015074c9f"
