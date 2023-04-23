@@ -1,8 +1,7 @@
-from fixtures import callee_func, dependent_func
-
 from sundew import test
 from sundew.graph import Graph
 from sundew.types import Function
+from tests.fixtures import callee_func, dependent_func
 
 test(Graph.add_connection)(
     kwargs={

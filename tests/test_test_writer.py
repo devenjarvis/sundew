@@ -3,9 +3,8 @@ from contextlib import ExitStack
 from pathlib import Path
 from unittest.mock import MagicMock
 
-import fixtures
-
 from sundew import test, test_writer, utils
+from tests import fixtures
 
 test(test_writer.mock_function_dependencies)(
     setup={fixtures.extend_config_with_dependent_functions},
@@ -62,5 +61,5 @@ test(test_writer.check_returns_for_imports)(
 
 test(test_writer.check_kwargs_for_imports)(
     kwargs={"test_fn": fixtures.function_test_with_function_kwargs},
-    returns=[["fixtures", "example_fn_2"]],
+    returns=[["tests.fixtures", "example_fn_2"]],
 )
