@@ -32,7 +32,7 @@ types-cachetools = "*"
 optional = true
 
 [tool.poetry.group.examples.dependencies]
-fastapi-example = {path = "examples/fastapi"}
+examples = {path = "examples"}
 
 [build-system]
 requires = ["poetry-core"]
@@ -48,13 +48,9 @@ sundew = "sundew"
 test = "sundew ./tests"
 type = "mypy sundew"
 
-test_simple_async = "sundew ./examples/simple_async/tests"
-test_simple_example = "sundew ./examples/simple_example/tests"
-test_simple_side_effects = "sundew ./examples/simple_side_effects/tests"
-test_fastapi = "sundew ./examples/fastapi/tests"
-
-test_examples = ["test_simple_async", "test_simple_example", "test_simple_side_effects", "test_fastapi"]
-
+[tool.poe.tasks.test_examples]
+cmd = "poe test"
+cwd = "./examples"
 
 
 [tool.ruff]
