@@ -24,7 +24,7 @@ test(build_test_strings)(
 )
 test(generate_naive_function_import)(
     kwargs={
-        "mock_name": "build_file_path",
+        "mock_name": "sundew.test_writer.build_file_path",
         "mock_test_functions": {
             FunctionTest(
                 function=build_file_path,
@@ -45,7 +45,7 @@ test(generate_naive_function_import)(
 )
 test(generate_naive_function_import)(
     kwargs={
-        "mock_name": "generate_naive_function_import",
+        "mock_name": "sundew.test_writer.generate_naive_function_import",
         "mock_test_functions": {
             FunctionTest(
                 function=generate_naive_function_import,
@@ -158,7 +158,7 @@ test(generate_naive_function_import)(
 )
 test(generate_naive_function_import)(
     kwargs={
-        "mock_name": "build_import_string",
+        "mock_name": "sundew.test_writer.build_import_string",
         "mock_test_functions": {
             FunctionTest(
                 function=build_import_string,
@@ -195,7 +195,7 @@ test(generate_naive_function_import)(
 )
 test(generate_naive_function_import)(
     kwargs={
-        "mock_name": "build_test_strings",
+        "mock_name": "sundew.test_writer.build_test_strings",
         "mock_test_functions": {
             FunctionTest(
                 function=build_test_strings,

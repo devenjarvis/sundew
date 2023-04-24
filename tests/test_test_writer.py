@@ -9,12 +9,14 @@ from tests import fixtures
 test(test_writer.mock_function_dependencies)(
     setup=[fixtures.extend_config_with_dependent_functions],
     kwargs={"fn": fixtures.callee_func, "stack": ExitStack()},
-    returns={"dependent_func": utils.FunctionSpy(fixtures.dependent_func)},
+    returns={
+        "tests.fixtures.dependent_func": utils.FunctionSpy(fixtures.dependent_func)
+    },
 )
 
 test(test_writer.generate_naive_function_import)(
     kwargs={
-        "mock_name": "mock_function_dependencies",
+        "mock_name": "sundew.test_writer.mock_function_dependencies",
         "mock_test_functions": {fixtures.dependent_func_function_test},
     },
     returns=[("sundew.test_writer", "mock_function_dependencies")],

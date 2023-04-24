@@ -7,7 +7,7 @@ from unittest.mock import patch
 import black
 
 from sundew.config import config
-from sundew.types import FunctionTest
+from sundew.types import Function, FunctionTest
 from sundew.utils import FunctionSpy
 
 
@@ -15,16 +15,17 @@ def mock_function_dependencies(
     fn: Callable, stack: AsyncExitStack
 ) -> dict[str, FunctionSpy]:
     mocks: dict[str, FunctionSpy] = {}
-    for dep_func_simple_name in config.test_graph.functions[fn.__name__].deps:
-        dep_func = config.test_graph.functions[dep_func_simple_name]
+    function = Function(declaration=fn)
+    for dep_func_name in config.test_graph.functions[function.name.qualified].deps:
+        dep_func = config.test_graph.functions[dep_func_name]
         # Recursively mock sub-dependent functions
         if (
-            config.test_graph.functions[dep_func_simple_name].deps
-            and dep_func_simple_name != "mock_function_dependencies"
+            config.test_graph.functions[dep_func_name].deps
+            and dep_func_name != "sundew.test_writer.mock_function_dependencies"
         ):
             mocks.update(mock_function_dependencies(dep_func.declaration, stack))
         # Spy on all dependent functions
-        mocks[dep_func_simple_name] = stack.enter_context(
+        mocks[dep_func_name] = stack.enter_context(
             patch(
                 dep_func.name.qualified,
                 FunctionSpy(dep_func.declaration),
@@ -147,21 +148,24 @@ def write_tests_to_file(
 
 
 def build_file_path(fn: Callable) -> Path:
-    if module_path := inspect.getmodule(fn).__file__:  # type: ignore[union-attr]
+    function = Function(fn)
+    if module_path := inspect.getmodule(function.declaration).__file__:  # type: ignore[union-attr]
         file_path = Path(module_path).resolve()
     else:
         file_path = Path(".").resolve()
 
-    for _ in config.test_graph.functions[fn.__name__].name.qualified.split(".")[:-1]:
+    for _ in config.test_graph.functions[function.name.qualified].name.qualified.split(
+        "."
+    )[:-1]:
         file_path = file_path.parent
     file_path = file_path / "tests"
-    for directory in config.test_graph.functions[fn.__name__].name.qualified.split(".")[
-        1:-1
-    ]:
+    for directory in config.test_graph.functions[
+        function.name.qualified
+    ].name.qualified.split(".")[1:-1]:
         # Create directory
         file_path /= directory
 
-    file_path /= f"auto_test_{fn.__name__}.py"
+    file_path /= f"auto_test_{function.name.simple}.py"
 
     return file_path
 
