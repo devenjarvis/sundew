@@ -85,7 +85,7 @@ def setup_simple_test_graph() -> Graph:
 
 passing_function_test_with_fixtures = FunctionTest(
     location="tests/fixtures.py:1000",
-    setup={setup_empty_graph},
+    setup=[setup_empty_graph],
     function=example_fn_3,
     kwargs={"a": 1},
     returns="hello1",

@@ -24,7 +24,7 @@ ormar = "^0.12.1"
 boto3 = "^1.26.118"
 
 [tool.poetry.group.dev.dependencies]
-moto = "^4.1.7"
+moto = {version="^4.1.7", extras = ["s3", "sqs", "dynamodb"]}
 sundew = {path = "../", develop = true}
 poethepoet = "*"
 
@@ -37,8 +37,9 @@ test_simple_async = "sundew ./simple_async/tests"
 test_simple_example = "sundew ./simple_example/tests"
 test_simple_side_effects = "sundew ./simple_side_effects/tests"
 test_fastapi = "sundew ./fastapi/tests"
+test_boto3 = "sundew ./boto3/tests"
 
-test = ["test_simple_async", "test_simple_example", "test_simple_side_effects", "test_fastapi"]
+test = ["test_simple_async", "test_simple_example", "test_simple_side_effects", "test_fastapi", "test_boto3"]
 
 [tool.poe.tasks.run_migrations]
 cmd = "alembic upgrade head"

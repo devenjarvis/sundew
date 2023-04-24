@@ -32,7 +32,7 @@ test(generate_naive_function_import)(
                 patches={},
                 returns=Path(".").resolve()
                 / "tests/test_writer/auto_test_generate_function_dependency_test_file.py",  # noqa: E501
-                setup=set(),
+                setup=[],
                 side_effects=[],
             )
         },
@@ -73,7 +73,7 @@ test(generate_naive_function_import)(
                             },
                             patches={},
                             returns="from pathlib import PosixPath\nfrom sundew.test import test\nfrom sundew.test_writer import (\n\tbuild_file_path,\n\tbuild_import_string,\n\tbuild_test_strings,\n\tgenerate_function_dependency_test_file,\n\tgenerate_naive_function_import,\n)\nfrom sundew.types import FunctionTest\n\n",  # noqa: E501
-                            setup=set(),
+                            setup=[],
                             side_effects=[],
                         ),
                         FunctionTest(
@@ -81,14 +81,14 @@ test(generate_naive_function_import)(
                             kwargs={"generated_test_file_imports": set()},
                             patches={},
                             returns="from sundew.test import test\n\n",
-                            setup=set(),
+                            setup=[],
                             side_effects=[],
                         ),
                     },
                 },
                 patches={},
                 returns=[("sundew.test_writer", "build_import_string")],
-                setup=set(),
+                setup=[],
                 side_effects=[],
             ),
             FunctionTest(
@@ -104,7 +104,7 @@ test(generate_naive_function_import)(
                     ("sundew.types", "FunctionTest"),
                     ("sundew.types", "FunctionTest"),
                 ],
-                setup=set(),
+                setup=[],
                 side_effects=[],
             ),
             FunctionTest(
@@ -118,7 +118,7 @@ test(generate_naive_function_import)(
                             patches={},
                             returns=Path(".").resolve()
                             / "tests/test_writer/auto_test_generate_function_dependency_test_file.py",  # noqa: E501
-                            setup=set(),
+                            setup=[],
                             side_effects=[],
                         )
                     },
@@ -129,7 +129,7 @@ test(generate_naive_function_import)(
                     ("sundew.test_writer", "generate_function_dependency_test_file"),
                     ("pathlib", "PosixPath"),
                 ],
-                setup=set(),
+                setup=[],
                 side_effects=[],
             ),
             FunctionTest(
@@ -142,14 +142,14 @@ test(generate_naive_function_import)(
                             kwargs={"fn_tests": set()},
                             patches={},
                             returns="",
-                            setup=set(),
+                            setup=[],
                             side_effects=[],
                         )
                     },
                 },
                 patches={},
                 returns=[("sundew.test_writer", "build_test_strings")],
-                setup=set(),
+                setup=[],
                 side_effects=[],
             ),
         },
@@ -178,7 +178,7 @@ test(generate_naive_function_import)(
                 },
                 patches={},
                 returns="from pathlib import PosixPath\nfrom sundew.test import test\nfrom sundew.test_writer import (\n\tbuild_file_path,\n\tbuild_import_string,\n\tbuild_test_strings,\n\tgenerate_function_dependency_test_file,\n\tgenerate_naive_function_import,\n)\nfrom sundew.types import FunctionTest\n\n",  # noqa: E501
-                setup=set(),
+                setup=[],
                 side_effects=[],
             ),
             FunctionTest(
@@ -186,7 +186,7 @@ test(generate_naive_function_import)(
                 kwargs={"generated_test_file_imports": set()},
                 patches={},
                 returns="from sundew.test import test\n\n",
-                setup=set(),
+                setup=[],
                 side_effects=[],
             ),
         },
@@ -202,7 +202,7 @@ test(generate_naive_function_import)(
                 kwargs={"fn_tests": set()},
                 patches={},
                 returns="",
-                setup=set(),
+                setup=[],
                 side_effects=[],
             )
         },

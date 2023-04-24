@@ -8,7 +8,7 @@ import boto3
 from botocore.exceptions import ClientError
 
 
-def upload_file(file_name: str, bucket: str, object_name: str | None = None) -> None:
+def upload_file(file_name: str, bucket: str, object_name: str | None = None) -> bool:
     # If S3 object_name was not specified, use file_name
     if object_name is None:
         object_name = Path(file_name).name
@@ -18,7 +18,7 @@ def upload_file(file_name: str, bucket: str, object_name: str | None = None) -> 
     try:
         s3_client.upload_file(file_name, bucket, object_name)
     except ClientError:
-        logging.exception()
+        logging.exception("boto3 client error")
         return False
     return True
 

@@ -69,7 +69,7 @@ def test(fn: Callable, proxy_fn: Union[Callable, None] = None) -> Callable:
     def add_test(
         cache: bool = False,  # noqa: FBT
         setup: Optional[
-            set[
+            list[
                 Callable[
                     [],
                     Union[
@@ -95,7 +95,7 @@ def test(fn: Callable, proxy_fn: Union[Callable, None] = None) -> Callable:
                 location=f"{os.path.relpath(inspect.stack()[1][1])}:{inspect.stack()[1][2]}",
                 patches=patches or {},
                 returns=returns,
-                setup=setup or set(),
+                setup=setup or [],
                 side_effects=side_effects or [],
             ),
         )
