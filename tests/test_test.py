@@ -42,9 +42,9 @@ test(sundew_test.select_functions_to_test)(
         <= set(_.returns)
     },
 )(
-    kwargs={"function_name": "example_fn_1"},
+    kwargs={"function_name": "tests.fixtures.example_fn_1"},
     setup=[fixtures.extend_config_with_simple_functions],
-    returns=["example_fn_1"],
+    returns=["tests.fixtures.example_fn_1"],
 )
 
 test(sundew_test.sort_tests)(
