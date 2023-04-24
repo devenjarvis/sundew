@@ -22,9 +22,10 @@ alembic = "^1.10.3"
 ormar = "^0.12.1"
 
 boto3 = "^1.26.118"
+moto = {version="^4.1.7", extras = ["s3", "sqs", "dynamodb"]}
+
 
 [tool.poetry.group.dev.dependencies]
-moto = {version="^4.1.7", extras = ["s3", "sqs", "dynamodb"]}
 sundew = {path = "../", develop = true}
 poethepoet = "*"
 

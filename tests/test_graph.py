@@ -11,7 +11,7 @@ test(Graph.add_connection)(
     },
     side_effects=[
         lambda _: _.self.functions["tests.fixtures.callee_func"].deps
-        == {"tests.fixtures.dependent_func"},  # noqa: E501
+        == {"tests.fixtures.dependent_func"},
     ],
 )
 
