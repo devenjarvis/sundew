@@ -14,14 +14,14 @@ files = [
 
 [[package]]
 name = "alembic"
-version = "1.10.3"
+version = "1.10.4"
 description = "A database migration tool for SQLAlchemy."
 category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "alembic-1.10.3-py3-none-any.whl", hash = "sha256:b2e0a6cfd3a8ce936a1168320bcbe94aefa3f4463cd773a968a55071beb3cd37"},
-    {file = "alembic-1.10.3.tar.gz", hash = "sha256:32a69b13a613aeb7e8093f242da60eff9daed13c0df02fff279c1b06c32965d2"},
+    {file = "alembic-1.10.4-py3-none-any.whl", hash = "sha256:43942c3d4bf2620c466b91c0f4fca136fe51ae972394a0cc8b90810d664e4f5c"},
+    {file = "alembic-1.10.4.tar.gz", hash = "sha256:295b54bbb92c4008ab6a7dcd1e227e668416d6f84b98b3c4446a2bc6214a556b"},
 ]
 
 [package.dependencies]
@@ -124,18 +124,18 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.26.118"
+version = "1.26.120"
 description = "The AWS SDK for Python"
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "boto3-1.26.118-py3-none-any.whl", hash = "sha256:1ff703152553f4d5fc9774071d114dbf06ec661eb1b29b6051f6b1f9d0c24873"},
-    {file = "boto3-1.26.118.tar.gz", hash = "sha256:d0ed43228952b55c9f44d1c733f74656418c39c55dbe36bc37feeef6aa583ded"},
+    {file = "boto3-1.26.120-py3-none-any.whl", hash = "sha256:0f8eeeb259befd6e8c464a05c69b66ba7b1e0c978300b446fc0823020acaf380"},
+    {file = "boto3-1.26.120.tar.gz", hash = "sha256:17b93fdff147577ef506adbcada0ac81dd4be3b8d8b3c7831f9ee9f7ac9615e5"},
 ]
 
 [package.dependencies]
-botocore = ">=1.29.118,<1.30.0"
+botocore = ">=1.29.120,<1.30.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -144,14 +144,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.29.118"
+version = "1.29.120"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.29.118-py3-none-any.whl", hash = "sha256:44cb088a73b02dd716c5c5715143a64d5f10388957285246e11f3cc893eebf9d"},
-    {file = "botocore-1.29.118.tar.gz", hash = "sha256:b51fc5d50cbc43edaf58b3ec4fa933b82755801c453bf8908c8d3e70ae1142c1"},
+    {file = "botocore-1.29.120-py3-none-any.whl", hash = "sha256:0010b2a654973ab7f8697a9bb69cc0bd92450a7d77dd65c858a717edfe2e40f6"},
+    {file = "botocore-1.29.120.tar.gz", hash = "sha256:82de714c06fcefbcf2f3854b81c51bf0c529ec902c6e927156ff47988aaeeb7a"},
 ]
 
 [package.dependencies]
@@ -2096,14 +2096,14 @@ files = [
 
 [[package]]
 name = "trove-classifiers"
-version = "2023.4.22"
+version = "2023.4.25"
 description = "Canonical source for classifiers on PyPI (pypi.org)."
 category = "dev"
 optional = false
 python-versions = "*"
 files = [
-    {file = "trove-classifiers-2023.4.22.tar.gz", hash = "sha256:65e8cb3929e3788141db90a0776b76fcafbeb548a4fbe6aee4bfd9656e899939"},
-    {file = "trove_classifiers-2023.4.22-py3-none-any.whl", hash = "sha256:f8823bc4b002fb60ad102f1a97fbb0086efe149123f5701bcbae93d330321cca"},
+    {file = "trove-classifiers-2023.4.25.tar.gz", hash = "sha256:a3a9034e4902772431c1efa111f83367be5052441a245e465e78ec38c795c2c9"},
+    {file = "trove_classifiers-2023.4.25-py3-none-any.whl", hash = "sha256:d9f453498bbf100382fbd976f9d1c1288274910d0ec876a54e7e03479839afe9"},
 ]
 
 [[package]]
@@ -2263,21 +2263,21 @@ test = ["websockets"]
 
 [[package]]
 name = "werkzeug"
-version = "2.2.3"
+version = "2.3.0"
 description = "The comprehensive WSGI web application library."
 category = "main"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "Werkzeug-2.2.3-py3-none-any.whl", hash = "sha256:56433961bc1f12533306c624f3be5e744389ac61d722175d543e1751285da612"},
-    {file = "Werkzeug-2.2.3.tar.gz", hash = "sha256:2e1ccc9417d4da358b9de6f174e3ac094391ea1d4fbef2d667865d819dfd0afe"},
+    {file = "Werkzeug-2.3.0-py3-none-any.whl", hash = "sha256:340335057f72974d9281dbaf52c8090a9f9a59ba304ae814bf0656e6559c0020"},
+    {file = "Werkzeug-2.3.0.tar.gz", hash = "sha256:3b6b46926d052b8ebca97c4dc73c12e47bdd07d57ab0600c039c3155450227bc"},
 ]
 
 [package.dependencies]
 MarkupSafe = ">=2.1.1"
 
 [package.extras]
-watchdog = ["watchdog"]
+watchdog = ["watchdog (>=2.3)"]
 
 [[package]]
 name = "xattr"
