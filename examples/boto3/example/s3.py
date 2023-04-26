@@ -3,12 +3,13 @@
 
 import logging
 from pathlib import Path
+from typing import Optional
 
 import boto3
 from botocore.exceptions import ClientError
 
 
-def upload_file(file_name: str, bucket: str, object_name: str | None = None) -> bool:
+def upload_file(file_name: str, bucket: str, object_name: Optional(str) = None) -> bool:
     # If S3 object_name was not specified, use file_name
     if object_name is None:
         object_name = Path(file_name).name
