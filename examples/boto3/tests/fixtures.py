@@ -39,6 +39,20 @@ def create_bucket() -> None:
 
 
 @contextmanager
+def create_queue() -> None:
+    try:
+        sqs = boto3.client("sqs", region_name="us-east-1")
+
+        # Create a SQS queue
+        response = sqs.create_queue(QueueName="test-queue")
+        print(response)
+        yield
+    finally:
+        queue_url = response["QueueUrl"]
+        sqs.delete_queue(QueueUrl=queue_url)
+
+
+@contextmanager
 def upload_object() -> None:
     s3.upload_file(file_name="test-file", bucket="my-bucket", object_name="my-object")
     yield

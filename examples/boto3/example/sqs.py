@@ -1,37 +1,30 @@
 # boto3 S3 Example
 # Source: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/sqs-examples.html
+from typing import Optional
+
 import boto3
 
 
-def send_message() -> str:
+def send_message(
+    queue_url: str, message_body: str, message_attributes: Optional[dict] = None
+) -> str:
     # Create SQS client
     sqs = boto3.client("sqs")
-
-    queue_url = "SQS_QUEUE_URL"
 
     # Send message to SQS queue
     response = sqs.send_message(
         QueueUrl=queue_url,
         DelaySeconds=10,
-        MessageAttributes={
-            "Title": {"DataType": "String", "StringValue": "The Whistler"},
-            "Author": {"DataType": "String", "StringValue": "John Grisham"},
-            "WeeksOn": {"DataType": "Number", "StringValue": "6"},
-        },
-        MessageBody=(
-            "Information about current NY Times fiction bestseller for "
-            "week of 12/11/2016."
-        ),
+        MessageAttributes=message_attributes or {},
+        MessageBody=message_body,
     )
 
     return response["MessageId"]
 
 
-def recieve_message() -> tuple[str, str]:
+def recieve_message(queue_url: str) -> tuple[str, str]:
     # Create SQS client
     sqs = boto3.client("sqs")
-
-    queue_url = "SQS_QUEUE_URL"
 
     # Receive message from SQS queue
     response = sqs.receive_message(
