@@ -9,7 +9,7 @@ def send_message(
     queue_url: str, message_body: str, message_attributes: Optional[dict] = None
 ) -> str:
     # Create SQS client
-    sqs = boto3.client("sqs")
+    sqs = boto3.client("sqs", region_name="us-east-1")
 
     # Send message to SQS queue
     response = sqs.send_message(

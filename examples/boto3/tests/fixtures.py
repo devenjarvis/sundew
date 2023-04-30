@@ -45,7 +45,9 @@ def create_queue() -> None:
 
         # Create a SQS queue
         response = sqs.create_queue(QueueName="test-queue")
-        print(response)
+    except ClientError:
+        logging.exception("boto3 client error")
+    else:
         yield
     finally:
         queue_url = response["QueueUrl"]

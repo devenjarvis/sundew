@@ -10,5 +10,6 @@ test(sqs.send_message)(
         "queue_url": "https://sqs.us-east-1.amazonaws.com/123456789012/test-queue",
         "message_body": "{'test': 'body'}",
     },
-    returns=1,
+    # This test returns a generated uuid. sundew doesn't currently support testing the
+    # shape/property of a return statement
 )
