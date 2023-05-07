@@ -3,19 +3,20 @@ from contextlib import ExitStack
 from pathlib import Path
 from unittest.mock import MagicMock
 
-import fixtures
-
 from sundew import test, test_writer, utils
+from tests import fixtures
 
 test(test_writer.mock_function_dependencies)(
-    setup={fixtures.extend_config_with_dependent_functions},
+    setup=[fixtures.extend_config_with_dependent_functions],
     kwargs={"fn": fixtures.callee_func, "stack": ExitStack()},
-    returns={"dependent_func": utils.FunctionSpy(fixtures.dependent_func)},
+    returns={
+        "tests.fixtures.dependent_func": utils.FunctionSpy(fixtures.dependent_func)
+    },
 )
 
 test(test_writer.generate_naive_function_import)(
     kwargs={
-        "mock_name": "mock_function_dependencies",
+        "mock_name": "sundew.test_writer.mock_function_dependencies",
         "mock_test_functions": {fixtures.dependent_func_function_test},
     },
     returns=[("sundew.test_writer", "mock_function_dependencies")],
@@ -62,5 +63,5 @@ test(test_writer.check_returns_for_imports)(
 
 test(test_writer.check_kwargs_for_imports)(
     kwargs={"test_fn": fixtures.function_test_with_function_kwargs},
-    returns=[["fixtures", "example_fn_2"]],
+    returns=[["tests.fixtures", "example_fn_2"]],
 )

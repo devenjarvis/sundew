@@ -1,8 +1,7 @@
-from fixtures import callee_func, dependent_func
-
 from sundew import test
 from sundew.graph import Graph
 from sundew.types import Function
+from tests.fixtures import callee_func, dependent_func
 
 test(Graph.add_connection)(
     kwargs={
@@ -11,7 +10,8 @@ test(Graph.add_connection)(
         "node2": Function(dependent_func),
     },
     side_effects=[
-        lambda _: _.self.functions["callee_func"].deps == {"dependent_func"},
+        lambda _: _.self.functions["tests.fixtures.callee_func"].deps
+        == {"tests.fixtures.dependent_func"},
     ],
 )
 

@@ -69,7 +69,7 @@ def test(fn: Callable, proxy_fn: Union[Callable, None] = None) -> Callable:
     def add_test(
         cache: bool = False,  # noqa: FBT
         setup: Optional[
-            set[
+            list[
                 Callable[
                     [],
                     Union[
@@ -95,7 +95,7 @@ def test(fn: Callable, proxy_fn: Union[Callable, None] = None) -> Callable:
                 location=f"{os.path.relpath(inspect.stack()[1][1])}:{inspect.stack()[1][2]}",
                 patches=patches or {},
                 returns=returns,
-                setup=setup or set(),
+                setup=setup or [],
                 side_effects=side_effects or [],
             ),
         )
@@ -308,7 +308,14 @@ async def run_test(
 def select_functions_to_test(function_name: str) -> list[str]:
     # Select function tests if provided
     if function_name:
-        selected_functions = [function_name]
+        if function_name in config.test_graph.functions:
+            selected_functions = [function_name]
+        else:
+            print(
+                f"\n[bold orange1]ERROR[/] requested function not found: {function_name}. "
+                "No tests gathered."
+            )
+            sys.exit(1)
     else:  # Else get all tests
         selected_functions = [
             key

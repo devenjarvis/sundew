@@ -1,0 +1,51 @@
+[tool.poetry]
+name = "examples"
+version = "0.1.0"
+description = "Example of using sundew to test applications"
+authors = ["devenjarvis <devenjarvis@gmail.com>"]
+packages = [
+    {include = "boto3"},
+    {include = "fastapi"},
+    {include = "simple_async"},
+    {include = "simple_example"},
+    {include = "simple_side_effects"},
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+fastapi = "^0.95.0"
+databases = "^0.6.0"
+uvicorn = "^0.21.1"
+aiosqlite = "^0.18.0"
+alembic = "^1.10.3"
+ormar = "^0.12.1"
+
+boto3 = "^1.26.118"
+moto = {version="^4.1.7", extras = ["s3", "sqs", "dynamodb"]}
+
+
+[tool.poetry.group.dev.dependencies]
+sundew = {path = "../", develop = true}
+poethepoet = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poe.tasks]
+test_simple_async = "sundew ./simple_async/tests"
+test_simple_example = "sundew ./simple_example/tests"
+test_simple_side_effects = "sundew ./simple_side_effects/tests"
+test_fastapi = "sundew ./fastapi/tests"
+test_boto3 = "sundew ./boto3/tests"
+
+test = ["test_simple_async", "test_simple_example", "test_simple_side_effects", "test_fastapi", "test_boto3"]
+
+[tool.poe.tasks.run_migrations]
+cmd = "alembic upgrade head"
+cwd = "./fastapi"
+
+[tool.poe.tasks.run]
+cmd = "uvicorn app.main:app --reload"
+cwd = "./fastapi"

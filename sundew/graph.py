@@ -10,26 +10,27 @@ class Graph:
             self.functions.update(other_graph.functions)
 
     def add_test(self, test: FunctionTest) -> None:
-        if test.name.simple not in self.functions:
-            self.functions[test.name.simple] = Function(declaration=test.function)
-        self.functions[test.name.simple].tests.add(test)
+        if test.name.qualified not in self.functions:
+            self.functions[test.name.qualified] = Function(declaration=test.function)
+        self.functions[test.name.qualified].tests.add(test)
 
     def add_connection(self, node1: Function, node2: Function) -> None:
-        # Assume connection is directional from A -> B
-        # Add connection between node1 and node2
-        if node1.name.simple not in self.functions:
-            self.functions[node1.name.simple] = node1
-        self.functions[node1.name.simple].deps.add(node2.name.simple)
+        if node1 != node2:  # Avoid recursive loops
+            # Assume connection is directional from A -> B
+            # Add connection between node1 and node2
+            if node1.name.qualified not in self.functions:
+                self.functions[node1.name.qualified] = node1
+            self.functions[node1.name.qualified].deps.add(node2.name.qualified)
 
-        # Add connection between node2 and node1
-        if node2.name.simple not in self.functions:
-            self.functions[node2.name.simple] = node2
-        self.functions[node2.name.simple].usage.add(node1.name.simple)
+            # Add connection between node2 and node1
+            if node2.name.qualified not in self.functions:
+                self.functions[node2.name.qualified] = node2
+            self.functions[node2.name.qualified].usage.add(node1.name.qualified)
 
     def all_functions(self) -> set[str]:
         all_deps = set()
         for function_under_test in self.functions.values():
-            all_deps.add(function_under_test.name.simple)
+            all_deps.add(function_under_test.name.qualified)
             all_deps.update(function_under_test.deps)
 
         return all_deps

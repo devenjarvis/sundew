@@ -33,11 +33,11 @@ class FunctionTest:
     kwargs: dict[str, Any] = field(default_factory=dict)
     patches: dict[str, Any] = field(default_factory=dict)
     returns: Optional[Any] = None
-    setup: set[
+    setup: list[
         Callable[
             [], Union[_GeneratorContextManager[Any], _AsyncGeneratorContextManager[Any]]
         ]
-    ] = field(default_factory=set)
+    ] = field(default_factory=list)
     side_effects: list[Callable[[Any], bool]] = field(default_factory=list)
 
     @property

@@ -16,7 +16,7 @@ test(main.create_note)(
 
 test(main.read_notes)(
     patches={"app.db.BaseMeta.database": test_sqlite_db},
-    setup={add_sample_notes},
+    setup=[add_sample_notes],
     returns=[
         db.Notes(id=1, text="test", completed=False),
         db.Notes(id=2, text="test2", completed=True),

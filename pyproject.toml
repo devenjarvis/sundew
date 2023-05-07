@@ -32,12 +32,7 @@ types-cachetools = "*"
 optional = true
 
 [tool.poetry.group.examples.dependencies]
-fastapi = "^0.95.0"
-databases = "^0.6.0"
-uvicorn = "^0.21.1"
-aiosqlite = "^0.18.0"
-alembic = "^1.10.3"
-ormar = "^0.12.1"
+examples = {path = "examples"}
 
 [build-system]
 requires = ["poetry-core"]
@@ -57,10 +52,9 @@ test_simple_async = "sundew ./examples/simple_async/tests"
 test_simple_example = "sundew ./examples/simple_example/tests"
 test_simple_side_effects = "sundew ./examples/simple_side_effects/tests"
 test_fastapi = "sundew ./examples/fastapi/tests"
+test_boto3 = "sundew ./examples/boto3/tests"
 
-test_examples = ["test_simple_async", "test_simple_example", "test_simple_side_effects", "test_fastapi"]
-
-
+test_examples = ["test_simple_async", "test_simple_example", "test_simple_side_effects", "test_fastapi", "test_boto3"]
 
 [tool.ruff]
 target-version = "py39"

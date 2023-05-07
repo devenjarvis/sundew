@@ -36,37 +36,50 @@ test(sundew_test.run_function)(
 
 test(sundew_test.select_functions_to_test)(
     kwargs={"function_name": ""},
-    setup={fixtures.extend_config_with_simple_functions},
-    side_effects={lambda _: {"example_fn_1", "example_fn_2"} <= set(_.returns)},
+    setup=[fixtures.extend_config_with_simple_functions],
+    side_effects={
+        lambda _: {"tests.fixtures.example_fn_1", "tests.fixtures.example_fn_2"}
+        <= set(_.returns)
+    },
 )(
-    kwargs={"function_name": "example_fn_1"},
-    setup={fixtures.extend_config_with_simple_functions},
-    returns=["example_fn_1"],
+    kwargs={"function_name": "tests.fixtures.example_fn_1"},
+    setup=[fixtures.extend_config_with_simple_functions],
+    returns=["tests.fixtures.example_fn_1"],
 )
 
 test(sundew_test.sort_tests)(
-    setup={fixtures.extend_config_with_dependent_functions},
-    kwargs={"selected_functions": ["dependent_func", "callee_func"]},
+    setup=[fixtures.extend_config_with_dependent_functions],
+    kwargs={
+        "selected_functions": [
+            "tests.fixtures.dependent_func",
+            "tests.fixtures.callee_func",
+        ]
+    },
     returns=[
         fixtures.dependent_func_function_test,
         fixtures.callee_func_function_test,
     ],
 )(
     # Should get same output, regardless of input order
-    setup={fixtures.extend_config_with_dependent_functions},
-    kwargs={"selected_functions": ["callee_func", "dependent_func"]},
+    setup=[fixtures.extend_config_with_dependent_functions],
+    kwargs={
+        "selected_functions": [
+            "tests.fixtures.callee_func",
+            "tests.fixtures.dependent_func",
+        ]
+    },
     returns=[
         fixtures.dependent_func_function_test,
         fixtures.callee_func_function_test,
     ],
 )(
     # Make sure sorting works with only 1 element
-    setup={fixtures.extend_config_with_dependent_functions},
-    kwargs={"selected_functions": ["dependent_func"]},
+    setup=[fixtures.extend_config_with_dependent_functions],
+    kwargs={"selected_functions": ["tests.fixtures.dependent_func"]},
     returns=[fixtures.dependent_func_function_test],
 )(
     # Make sure sorting works with zero elements
-    setup={fixtures.extend_config_with_dependent_functions},
+    setup=[fixtures.extend_config_with_dependent_functions],
     kwargs={"selected_functions": []},
     returns=[],
 )
